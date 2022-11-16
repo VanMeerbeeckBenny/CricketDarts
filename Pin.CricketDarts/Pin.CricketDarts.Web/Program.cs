@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using Pin.CricketDarts.Core.Interfaces.Repositories;
 using Pin.CricketDarts.Infrastructure.Data;
+using Pin.CricketDarts.Infrastructure.Repositories;
 
 namespace Pin.CricketDarts.Web
 {
@@ -12,7 +14,8 @@ namespace Pin.CricketDarts.Web
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<DbDartsContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DartsDb")));
-          
+
+            builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();         
