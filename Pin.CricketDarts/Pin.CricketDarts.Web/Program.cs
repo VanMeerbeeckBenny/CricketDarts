@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-
+using Microsoft.EntityFrameworkCore;
+using Pin.CricketDarts.Infrastructure.Data;
 
 namespace Pin.CricketDarts.Web
 {
@@ -9,6 +10,8 @@ namespace Pin.CricketDarts.Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<DbDartsContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DartsDb")));
           
             // Add services to the container.
             builder.Services.AddRazorPages();
