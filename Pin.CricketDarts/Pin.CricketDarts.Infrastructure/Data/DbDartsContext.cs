@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pin.CricketDarts.Core.Entities;
+using Pin.CricketDarts.Infrastructure.Data.Seeding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,8 @@ namespace Pin.CricketDarts.Infrastructure.Data
              .HasOne(pt => pt.Throws)
              .WithMany(p => p.PlayerThrows)
              .HasForeignKey(p => p.ThrowId);
-     
+
+            Seeder.Seed(modelBuilder);
         }
     }
 }
