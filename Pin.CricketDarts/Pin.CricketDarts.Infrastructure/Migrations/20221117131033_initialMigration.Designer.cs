@@ -12,8 +12,8 @@ using Pin.CricketDarts.Infrastructure.Data;
 namespace Pin.CricketDarts.Infrastructure.Migrations
 {
     [DbContext(typeof(DbDartsContext))]
-    [Migration("20221116112007_Seeding")]
-    partial class Seeding
+    [Migration("20221117131033_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,28 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                     b.HasIndex("PlayersId");
 
                     b.ToTable("MatchPlayer");
+
+                    b.HasData(
+                        new
+                        {
+                            MatchesId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayersId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8")
+                        },
+                        new
+                        {
+                            MatchesId = new Guid("13f862c0-f7b2-4d45-aa6d-d488a5f968ca"),
+                            PlayersId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8")
+                        },
+                        new
+                        {
+                            MatchesId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayersId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb")
+                        },
+                        new
+                        {
+                            MatchesId = new Guid("13f862c0-f7b2-4d45-aa6d-d488a5f968ca"),
+                            PlayersId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb")
+                        });
                 });
 
             modelBuilder.Entity("Pin.CricketDarts.Core.Entities.Match", b =>
@@ -65,19 +87,19 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
+                            Id = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
                             IsActiveGame = false,
                             PlayerOneScore = 0,
                             PlayerTwoScore = 0,
-                            TimeStamp = new DateTime(2022, 11, 16, 12, 20, 7, 376, DateTimeKind.Local).AddTicks(128)
+                            TimeStamp = new DateTime(2022, 11, 17, 14, 10, 33, 206, DateTimeKind.Local).AddTicks(5308)
                         },
                         new
                         {
-                            Id = new Guid("ad6626b8-4720-443a-8800-62087fe9a7a2"),
+                            Id = new Guid("13f862c0-f7b2-4d45-aa6d-d488a5f968ca"),
                             IsActiveGame = false,
                             PlayerOneScore = 0,
                             PlayerTwoScore = 0,
-                            TimeStamp = new DateTime(2022, 11, 16, 14, 20, 7, 376, DateTimeKind.Local).AddTicks(164)
+                            TimeStamp = new DateTime(2022, 11, 17, 16, 10, 33, 206, DateTimeKind.Local).AddTicks(5340)
                         });
                 });
 
@@ -97,12 +119,12 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6fef54ec-e3b1-4c48-95e3-db667b4c4a42"),
+                            Id = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8"),
                             Name = "Benny"
                         },
                         new
                         {
-                            Id = new Guid("b56310f0-76eb-4adb-8513-d9effa9d9cfa"),
+                            Id = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb"),
                             Name = "Yoran"
                         });
                 });
@@ -138,66 +160,66 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ec4749bf-d8dc-4ab1-9405-5980c2d2e5e9"),
-                            MatchId = new Guid("ad6626b8-4720-443a-8800-62087fe9a7a2"),
-                            PlayerId = new Guid("6fef54ec-e3b1-4c48-95e3-db667b4c4a42"),
-                            ThrowId = new Guid("9e32ca82-ee5b-41d7-8329-60f858c93138"),
+                            Id = new Guid("6c519dfa-2ad5-4bf8-a52a-d50690b17566"),
+                            MatchId = new Guid("13f862c0-f7b2-4d45-aa6d-d488a5f968ca"),
+                            PlayerId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8"),
+                            ThrowId = new Guid("9104787b-24ce-44a7-9d74-88a524cc152b"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("1ab92f21-348a-4537-9c8f-34aa7bcc3584"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("6fef54ec-e3b1-4c48-95e3-db667b4c4a42"),
-                            ThrowId = new Guid("1c5aff2a-990a-4727-9e17-fc01c537f16f"),
+                            Id = new Guid("f5789b62-bf29-44ce-a64a-5eaac0879873"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8"),
+                            ThrowId = new Guid("6a984e5c-8eae-4165-93a4-c82b68b832e2"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("9e8c0c4d-5cd6-4a05-aa8b-f396e46d0abf"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("6fef54ec-e3b1-4c48-95e3-db667b4c4a42"),
-                            ThrowId = new Guid("c254f168-90c6-44a5-9271-52bdfa1332af"),
+                            Id = new Guid("8c2466f8-e014-4da8-9cd7-bcafda3cf550"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8"),
+                            ThrowId = new Guid("7677032a-4405-4cd2-a6e6-58012b96b9cb"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("b6a0a05d-ad89-4417-905d-d8dc3ace8197"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("6fef54ec-e3b1-4c48-95e3-db667b4c4a42"),
-                            ThrowId = new Guid("97cececf-3ed2-496c-8706-2df4a3b1c97e"),
+                            Id = new Guid("c6ddcf77-8b64-40a0-89e6-81b17674432a"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("0ea0c441-d555-49c9-af61-40337e1ff5a8"),
+                            ThrowId = new Guid("62daf55e-e7cf-421c-9d1b-a21012deae72"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("c22422cc-98f3-4463-bd7c-163209636181"),
-                            MatchId = new Guid("ad6626b8-4720-443a-8800-62087fe9a7a2"),
-                            PlayerId = new Guid("b56310f0-76eb-4adb-8513-d9effa9d9cfa"),
-                            ThrowId = new Guid("c08780c1-5e2e-4a76-9457-7a1f40955474"),
+                            Id = new Guid("2966f438-4e50-4019-9bcf-74e8c1012685"),
+                            MatchId = new Guid("13f862c0-f7b2-4d45-aa6d-d488a5f968ca"),
+                            PlayerId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb"),
+                            ThrowId = new Guid("7677032a-4405-4cd2-a6e6-58012b96b9cb"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("cdb63195-e4ea-44b9-833b-87759d01ecdc"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("b56310f0-76eb-4adb-8513-d9effa9d9cfa"),
-                            ThrowId = new Guid("63d9e6da-d4c6-43c2-ade9-30d5f52bfeba"),
+                            Id = new Guid("890c682b-1870-4ff1-bae2-16f0f449d794"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb"),
+                            ThrowId = new Guid("b634742b-2bc4-42a2-9bb9-4be04da85795"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("71c4107d-bb73-4e69-b7f6-7ee3ead4208c"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("b56310f0-76eb-4adb-8513-d9effa9d9cfa"),
-                            ThrowId = new Guid("3c11ce76-b3ca-44f4-bdea-cacf04bc9e7d"),
+                            Id = new Guid("03605ef5-fd30-4853-bee9-34901439d9e4"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb"),
+                            ThrowId = new Guid("dd9fd715-c237-4d72-83d1-c9af05ffe852"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("c74f8b59-5abe-466a-a41b-544b74db7087"),
-                            MatchId = new Guid("d9e3adf9-3432-4362-a1b2-761d4f85cbb6"),
-                            PlayerId = new Guid("b56310f0-76eb-4adb-8513-d9effa9d9cfa"),
-                            ThrowId = new Guid("02baa8dd-1b97-4991-a861-0620bd15b09b"),
+                            Id = new Guid("def0a654-df39-4fbc-b97b-0a776ba37508"),
+                            MatchId = new Guid("12502152-49db-4882-9a04-8df1a7b38969"),
+                            PlayerId = new Guid("ac468341-f749-4c7c-a8c6-8b5b3cf10bcb"),
+                            ThrowId = new Guid("f3a6b41f-7b67-4e66-bc2b-d70222130fb0"),
                             TimeStamp = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -208,26 +230,8 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("Bull")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Eighteen")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Fifteen")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Nineteen")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Seventeen")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Sixteen")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("Twenty")
-                        .HasColumnType("tinyint");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -236,91 +240,103 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9e32ca82-ee5b-41d7-8329-60f858c93138"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)0,
-                            Fifteen = (byte)0,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)3,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)2
+                            Id = new Guid("9104787b-24ce-44a7-9d74-88a524cc152b"),
+                            Name = "Fifteen"
                         },
                         new
                         {
-                            Id = new Guid("1c5aff2a-990a-4727-9e17-fc01c537f16f"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)0,
-                            Fifteen = (byte)2,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)3
+                            Id = new Guid("6a984e5c-8eae-4165-93a4-c82b68b832e2"),
+                            Name = "DoubleFifteen"
                         },
                         new
                         {
-                            Id = new Guid("c254f168-90c6-44a5-9271-52bdfa1332af"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)0,
-                            Fifteen = (byte)0,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)3,
-                            Twenty = (byte)2
+                            Id = new Guid("ce5ddebe-97db-4d51-b1de-755ff4269ac6"),
+                            Name = "TripleFifteen"
                         },
                         new
                         {
-                            Id = new Guid("97cececf-3ed2-496c-8706-2df4a3b1c97e"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)1,
-                            Fifteen = (byte)0,
-                            Nineteen = (byte)2,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)0
+                            Id = new Guid("ddcd125b-380e-4d94-a322-0a2e0f160c1c"),
+                            Name = "Sixteen"
                         },
                         new
                         {
-                            Id = new Guid("c08780c1-5e2e-4a76-9457-7a1f40955474"),
-                            Bull = (byte)2,
-                            Eighteen = (byte)0,
-                            Fifteen = (byte)0,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)2
+                            Id = new Guid("7677032a-4405-4cd2-a6e6-58012b96b9cb"),
+                            Name = "DoubleSixteen"
                         },
                         new
                         {
-                            Id = new Guid("63d9e6da-d4c6-43c2-ade9-30d5f52bfeba"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)0,
-                            Fifteen = (byte)3,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)2
+                            Id = new Guid("e58db293-618c-43c2-8692-c24d8b5fe106"),
+                            Name = "TripleSixteen"
                         },
                         new
                         {
-                            Id = new Guid("3c11ce76-b3ca-44f4-bdea-cacf04bc9e7d"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)2,
-                            Fifteen = (byte)3,
-                            Nineteen = (byte)0,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)0
+                            Id = new Guid("62daf55e-e7cf-421c-9d1b-a21012deae72"),
+                            Name = "Seventeen"
                         },
                         new
                         {
-                            Id = new Guid("02baa8dd-1b97-4991-a861-0620bd15b09b"),
-                            Bull = (byte)0,
-                            Eighteen = (byte)1,
-                            Fifteen = (byte)0,
-                            Nineteen = (byte)2,
-                            Seventeen = (byte)0,
-                            Sixteen = (byte)0,
-                            Twenty = (byte)0
+                            Id = new Guid("4fa7134a-2a37-4cfa-b4ba-9a2b4db0363c"),
+                            Name = "DoubleSeventeen"
+                        },
+                        new
+                        {
+                            Id = new Guid("b634742b-2bc4-42a2-9bb9-4be04da85795"),
+                            Name = "TripleSeventeen"
+                        },
+                        new
+                        {
+                            Id = new Guid("88405f54-c6ed-47df-80b5-0e42457002ab"),
+                            Name = "Eighteen"
+                        },
+                        new
+                        {
+                            Id = new Guid("b84a8ee8-6e44-47ae-9410-1e1c2ce14213"),
+                            Name = "DoubleEighteen"
+                        },
+                        new
+                        {
+                            Id = new Guid("f3adcd5f-49b6-4040-a8c1-2feada674475"),
+                            Name = "TripleEigteen"
+                        },
+                        new
+                        {
+                            Id = new Guid("07c9eca6-80d7-4e89-a631-93822f0c4213"),
+                            Name = "NineTeen"
+                        },
+                        new
+                        {
+                            Id = new Guid("379f3865-12b2-4038-8f78-b606481641de"),
+                            Name = "DoubleNineTeen"
+                        },
+                        new
+                        {
+                            Id = new Guid("b65d0b0e-44d6-4ccb-85d4-baaa5e101686"),
+                            Name = "TripleNineTeen"
+                        },
+                        new
+                        {
+                            Id = new Guid("78b9768b-739c-4493-9fe6-30727a06be4b"),
+                            Name = "Twenty"
+                        },
+                        new
+                        {
+                            Id = new Guid("dd9fd715-c237-4d72-83d1-c9af05ffe852"),
+                            Name = "DoubleTwenty"
+                        },
+                        new
+                        {
+                            Id = new Guid("0a053ee7-b5d1-44db-a98c-691c744bba83"),
+                            Name = "TripleTwenty"
+                        },
+                        new
+                        {
+                            Id = new Guid("61abbd04-0ca6-475e-a313-e906c0e8db7e"),
+                            Name = "BullOuter"
+                        },
+                        new
+                        {
+                            Id = new Guid("f3a6b41f-7b67-4e66-bc2b-d70222130fb0"),
+                            Name = "BullInner"
                         });
                 });
 
