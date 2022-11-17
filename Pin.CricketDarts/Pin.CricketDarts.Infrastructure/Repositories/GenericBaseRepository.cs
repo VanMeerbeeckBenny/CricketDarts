@@ -12,7 +12,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
 {
     public abstract class GenericBaseRepository<T>:IBaseRepository<T> where T : BaseEntitie
     {
-        private readonly DbDartsContext _cricketDartsDB;
+        protected readonly DbDartsContext _cricketDartsDB;
         protected readonly DbSet<T> _table;
 
         public GenericBaseRepository(DbDartsContext dbDarts)
