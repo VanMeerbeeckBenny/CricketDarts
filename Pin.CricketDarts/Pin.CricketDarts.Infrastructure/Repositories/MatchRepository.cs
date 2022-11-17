@@ -29,5 +29,12 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
             return await _table.Include(m => m.Players)
                          .FirstOrDefaultAsync(m => m.Id == id);
         }
+
+        public async Task<IEnumerable<Match>>GetByUserIdAsync(Guid userId)
+        {
+            return await _table.Include(m => m.Players)
+                               .Where(m => m.Players.Select(p => p.Id).Contains(userId))
+                               .ToListAsync();
+        }
     }
 }
