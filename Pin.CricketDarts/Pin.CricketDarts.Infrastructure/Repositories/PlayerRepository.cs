@@ -17,7 +17,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         {
 
         }
-        public override async Task<Player> GetByIdAsync(Guid id)
+        public async Task<Player> GetByIdWithAllThrowsAsync(Guid id)
         {
             return await _table
                         .Include(p => p.Matches)

@@ -11,6 +11,8 @@ namespace Pin.CricketDarts.Core.Interfaces.Repositories
     {
 
         Task<IEnumerable<Player>> GetByMatchId(Guid matchId);
-                    
+        Task<Player> GetByIdWithAllThrowsAsync(Guid id);
+
+
     }
 }
