@@ -76,6 +76,10 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
                 .WithMany(m => m.Players)
                 .UsingEntity(x => x.HasData(matchPlayer));
 
+            builder.Entity<Throw>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+
             builder.Entity<Player>().HasData(players);
             builder.Entity<Throw>().HasData(throws);
             builder.Entity<Match>().HasData(matches);
