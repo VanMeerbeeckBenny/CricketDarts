@@ -21,26 +21,26 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
 
             var throws = new Throw[]
             {
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.Fifteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleFifteen.ToString() },
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleFifteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.Sixteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleSixteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleSixteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.Seventeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleSeventeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleSeventeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.Eighteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleEighteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleEigteen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.NineTeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleNineTeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleNineTeen.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.Twenty.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.DoubleTwenty.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.TripleTwenty.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.BullOuter.ToString()},
-                new Throw {Id = Guid.NewGuid(),Name = DartsScoreEnum.BullInner.ToString()},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Fifteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleFifteen },
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleFifteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Sixteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSixteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSixteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Seventeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSeventeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSeventeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Eighteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleEighteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleEigteen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.NineTeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleNineTeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleNineTeen},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Twenty},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleTwenty},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleTwenty},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullOuter},
+                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullInner},
             };
 
             var matches = new Match[]
@@ -77,7 +77,7 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
                 .UsingEntity(x => x.HasData(matchPlayer));
 
             builder.Entity<Throw>()
-                .HasIndex(t => t.Name)
+                .HasIndex(t => t.Score)
                 .IsUnique();
 
             builder.Entity<Player>().HasData(players);
