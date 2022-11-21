@@ -19,8 +19,14 @@ namespace Pin.CricketDarts.Core.Services
             _playerRepository = playerRepository; 
         }
 
-        public async Task<ItemResultModel<Player>> CreateAsync(Player playerToAdd)
+        public async Task<ItemResultModel<Player>> CreateAsync(string firstname,string lastname)
         {
+            Player playerToAdd = new Player
+            {
+                Id = Guid.NewGuid(),
+                Firstname = firstname,
+                Lastname = lastname
+            };
             if (playerToAdd == null)
                 return new ItemResultModel<Player> { ErrorMessage = "Please provide a valid player!" };
 
@@ -61,5 +67,7 @@ namespace Pin.CricketDarts.Core.Services
                 };
             }
         }
+
+
     }
 }
