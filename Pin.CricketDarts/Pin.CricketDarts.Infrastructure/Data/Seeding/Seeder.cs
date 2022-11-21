@@ -15,8 +15,8 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
         {
             var players = new Player[]
             {
-                new Player{ Id = Guid.NewGuid(),Name="Benny" },
-                new Player{ Id = Guid.NewGuid(),Name="Yoran" },
+                new Player{ Id = Guid.NewGuid(),Firstname="Benny",Lastname="Van Meerbeeck" },
+                new Player{ Id = Guid.NewGuid(),Firstname="Arlette",Lastname="Verheugen" },
             };
 
             var throws = new Throw[]
