@@ -8,7 +8,8 @@ namespace Pin.CricketDarts.Core.Entities
 {
     public class Player : BaseEntitie
     {
-        public string Name { get; set; }        
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
         public List<PlayerThrow> AllThrows { get; set; }
         public List<Match> Matches { get; set; }
     }
