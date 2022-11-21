@@ -36,6 +36,23 @@ namespace Pin.CricketDarts.Core.Services
             return new ItemResultModel<Player> { ErrorMessage = "Something went wrong, please try again later" }; ;
         }
 
+        public async Task<ItemResultModel<Player>> GetAllPlayersAsync()
+        {
+            var players = await _playerRepository.GetAllAsync();
+
+            if (players == null || !players.Any())
+                return new ItemResultModel<Player> { ErrorMessage = "Player not found" };
+
+            else
+            {
+                return new ItemResultModel<Player>
+                {
+                    Items = players ,
+                    IsSucces = true
+                };
+            }
+        }
+
         public async Task<ItemResultModel<Player>> GetPlayerByIdAsync(Guid id)
         {
             var player = await _playerRepository.GetByIdAsync(id);
