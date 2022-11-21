@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pin.CricketDarts.Web", "Pin.CricketDarts.Web\Pin.CricketDarts.Web.csproj", "{B210927B-74E4-44D7-8C47-62E4C9E766FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pin.CricketDarts.Web", "Pin.CricketDarts.Web\Pin.CricketDarts.Web.csproj", "{B210927B-74E4-44D7-8C47-62E4C9E766FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pin.CricketDarts.Core", "Pin.CricketDarts.Core\Pin.CricketDarts.Core.csproj", "{40B0729D-CD3C-4C88-9DEB-20695DD81E45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pin.CricketDarts.Core", "Pin.CricketDarts.Core\Pin.CricketDarts.Core.csproj", "{40B0729D-CD3C-4C88-9DEB-20695DD81E45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pin.CricketDarts.Infrastructure", "Pin.CricketDarts.Infrastructure\Pin.CricketDarts.Infrastructure.csproj", "{B785123B-265A-4FE9-8205-E32FE477AE1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pin.CricketDarts.Infrastructure", "Pin.CricketDarts.Infrastructure\Pin.CricketDarts.Infrastructure.csproj", "{B785123B-265A-4FE9-8205-E32FE477AE1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
