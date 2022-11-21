@@ -1,0 +1,79 @@
+﻿@page "/AddPlayer"
+@inject IPlayerService _playerService
+@inject NavigationManager navigation
+<h3>AddPlayer</h3>
+
+<EditForm Model="@newPlayer" OnValidSubmit="SavePlayer">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div>
+        <div class="text-danger @visibilityError">
+            <p>@errorMessage</p>
+        </div>
+        <div class="text-success @visibilitySucces">
+            <p>@succesMessage</p>
+        </div>
+        <div class="form-group">
+            <label for="firstname">FirstName :</label>
+            <InputText id="firstname" class="form-control"
+                       @bind-Value="newPlayer.FirstName"></InputText>
+            <ValidationMessage For="() => newPlayer.FirstName" />
+        </div>
+
+        <div class="form-group">
+            <label for="lastname">Lastname :</label>
+            <InputText id="lastname" class="form-control"
+                       @bind-Value="newPlayer.LastName"></InputText>
+            <ValidationMessage For="() => newPlayer.LastName" />
+        </div>
+
+        <div class="mt-2">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-danger" @onclick="RedirectToCommandCenter">Cancel</button>
+        </div>
+    </div>
+    
+</EditForm>
+
+@code {
+    private DartsPlayer newPlayer;
+    private string succesMessage;
+    private string errorMessage;
+    private string visibilityError = "invisible";
+    private string visibilitySucces = "invisible";
+
+    protected override Task OnInitializedAsync()
+    {
+        newPlayer = new();
+        return base.OnInitializedAsync();
+    }
+
+    private async void SavePlayer()
+    {
+        ResetFeedback();
+        var result = await _playerService.CreateAsync(newPlayer.FirstName, newPlayer.LastName);
+        if (result.IsSucces)
+        {
+            succesMessage = "Player has been addet!";
+            visibilitySucces = "visible";
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+            visibilityError = "visible";
+        }
+        StateHasChanged();
+    }
+    private void RedirectToCommandCenter()
+    {
+        navigation.NavigateTo("/CommandCenter");
+    }
+
+    private void ResetFeedback()
+    {
+        visibilityError = "invisible";
+        visibilitySucces = "invisible";
+        succesMessage = String.Empty;
+        errorMessage = String.Empty;
+    }
+}
