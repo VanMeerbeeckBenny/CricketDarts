@@ -22,13 +22,15 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
             return await _table
                         .Include(p => p.Matches)
                         .Include(p => p.AllThrows)
+                        .ThenInclude(at => at.Throws)
                         .FirstOrDefaultAsync(p => p.Id == id);
         }
         public override async Task<IEnumerable<Player>> GetAllAsync()
         {
             return await _table
                         .Include(p => p.Matches)
-                        .Include(p => p.AllThrows)                     
+                        .Include(p => p.AllThrows)  
+                        .ThenInclude(at => at.Throws)
                         .ToListAsync();
         }
 
