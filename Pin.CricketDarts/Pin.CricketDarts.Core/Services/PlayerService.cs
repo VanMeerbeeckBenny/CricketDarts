@@ -21,14 +21,25 @@ namespace Pin.CricketDarts.Core.Services
 
         public async Task<ItemResultModel<Player>> CreateAsync(string firstname,string lastname)
         {
+
             Player playerToAdd = new Player
             {
                 Id = Guid.NewGuid(),
                 Firstname = firstname,
                 Lastname = lastname
             };
+
             if (playerToAdd == null)
                 return new ItemResultModel<Player> { ErrorMessage = "Please provide a valid player!" };
+
+            var players = await _playerRepository.GetAllAsync();
+            var foundPlayer = players.SingleOrDefault(p => p.Firstname.ToLower() == playerToAdd.Firstname.ToLower() &&
+                               p.Lastname.ToLower() == playerToAdd.Lastname.ToLower());
+
+            if (foundPlayer != null) return new ItemResultModel<Player>
+            {
+                ErrorMessage = $"{playerToAdd.Lastname} {playerToAdd.Firstname} alreddy exists!"
+            };
 
             if (await _playerRepository.CreateAsync(playerToAdd))
                 return new ItemResultModel<Player> { IsSucces = true };
