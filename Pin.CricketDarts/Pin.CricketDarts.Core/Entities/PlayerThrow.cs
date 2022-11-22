@@ -7,7 +7,7 @@
         public Guid PlayerId { get; set; }
         public Player Player { get; set; }
         public Guid ThrowId { get; set; }
-        public Throw Throws { get; set; }
+        public Point Throws { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 }

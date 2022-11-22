@@ -14,7 +14,7 @@ namespace Pin.CricketDarts.Infrastructure.Data
         public DbSet<Player> Player { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<PlayerThrow> PlayerThrows { get; set; }
-        public DbSet<Throw> Throws { get; set; }
+        public DbSet<Point> Throws { get; set; }
 
         public DbDartsContext(DbContextOptions<DbDartsContext> options):base(options)
         {
