@@ -11,18 +11,25 @@ using System.Threading.Tasks;
 
 namespace Pin.CricketDarts.Infrastructure.Repositories
 {
-    public class ThrowRepository : GenericBaseRepository<Throw>
+    public class ThrowRepository : GenericBaseRepository<Point>, IThrowRepository
     {
         public ThrowRepository(DbDartsContext context):base(context)
         {
 
         }
 
-        public async Task<Throw>GetThrowsById(Guid id)
-        {            
-            Throw score =await _table.FirstOrDefaultAsync(t => t.Id == id);           
-
-            return score;
+        public async Task<Point>GetThrowByValue(int value)
+        {
+            return await _table
+                .FirstOrDefaultAsync(t => (int)t.Score == value);
         }
+
+        public async Task<IEnumerable<Point>> GetAll()
+        {
+            return await _table
+                .OrderBy(p => p.OriginalScore)
+                .ThenBy(p => p.Score).ToListAsync();
+        }
+
     }
 }
