@@ -19,28 +19,28 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
                 new Player{ Id = Guid.NewGuid(),Firstname="Arlette",Lastname="Verheugen" },
             };
 
-            var throws = new Throw[]
+            var throws = new Point[]
             {
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Fifteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleFifteen },
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleFifteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Sixteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSixteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSixteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Seventeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSeventeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSeventeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Eighteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleEighteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleEigteen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.NineTeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleNineTeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleNineTeen},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.Twenty},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleTwenty},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleTwenty},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullOuter},
-                new Throw {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullInner},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.Fifteen, OriginalScore=DartsScoreEnum.Fifteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleFifteen, OriginalScore=DartsScoreEnum.Fifteen },
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleFifteen, OriginalScore=DartsScoreEnum.Fifteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.Sixteen, OriginalScore = DartsScoreEnum.Sixteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSixteen, OriginalScore = DartsScoreEnum.Sixteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSixteen, OriginalScore = DartsScoreEnum.Sixteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.Seventeen, OriginalScore = DartsScoreEnum.Seventeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleSeventeen, OriginalScore = DartsScoreEnum.Seventeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleSeventeen, OriginalScore = DartsScoreEnum.Seventeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.Eighteen, OriginalScore = DartsScoreEnum.Eighteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleEighteen, OriginalScore = DartsScoreEnum.Eighteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleEigteen, OriginalScore = DartsScoreEnum.Eighteen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.NineTeen, OriginalScore = DartsScoreEnum.NineTeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleNineTeen, OriginalScore = DartsScoreEnum.NineTeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleNineTeen, OriginalScore = DartsScoreEnum.NineTeen},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.Twenty, OriginalScore = DartsScoreEnum.Twenty},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.DoubleTwenty, OriginalScore = DartsScoreEnum.Twenty},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleTwenty, OriginalScore = DartsScoreEnum.Twenty},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullOuter,OriginalScore = DartsScoreEnum.BullOuter},
+                new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullInner,OriginalScore = DartsScoreEnum.BullOuter},
             };
 
             var matches = new Match[]
@@ -76,12 +76,12 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
                 .WithMany(m => m.Players)
                 .UsingEntity(x => x.HasData(matchPlayer));
 
-            builder.Entity<Throw>()
+            builder.Entity<Point>()
                 .HasIndex(t => t.Score)
                 .IsUnique();
 
             builder.Entity<Player>().HasData(players);
-            builder.Entity<Throw>().HasData(throws);
+            builder.Entity<Point>().HasData(throws);
             builder.Entity<Match>().HasData(matches);
             builder.Entity<PlayerThrow>().HasData(playerThrows);
         }
