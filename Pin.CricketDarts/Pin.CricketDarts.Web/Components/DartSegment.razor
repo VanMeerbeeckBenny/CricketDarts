@@ -1,0 +1,21 @@
+﻿
+
+
+<div class="d-flex justify-content-center flex-column text-center" >
+    <h5>@DataModel.Name</h5>
+    <div class="d-flex flex-column pie-chart">
+        <div class="triple segment" @onclick="e =>OnSelected.InvokeAsync(DataModel.Triple)"></div>
+        <div class="first-single segment" @onclick="e =>OnSelected.InvokeAsync(DataModel.Single)"></div>
+        <div class="double segment" @onclick="e =>OnSelected.InvokeAsync(DataModel.Double)"></div>
+        <div class="last-single segment" @onclick="e =>OnSelected.InvokeAsync(DataModel.Single)"></div>
+    </div>
+
+</div>
+
+
+@code {
+    [Parameter]
+    public ScoresPerNumberModel DataModel { get; set; }
+    [Parameter]
+    public EventCallback<ScoreModel> OnSelected { get; set; }
+}
