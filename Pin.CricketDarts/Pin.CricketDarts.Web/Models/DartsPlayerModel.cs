@@ -2,7 +2,7 @@
 
 namespace Pin.CricketDarts.Web.Models
 {
-    public class DartsPlayer : BaseModel
+    public class DartsPlayerModel : BaseModel
     {
         [Required(ErrorMessage = "Please provide a {0}")]
         [MinLength(2,ErrorMessage ="{0} must have a length of minimum {1}")]
