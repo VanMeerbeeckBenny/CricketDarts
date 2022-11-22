@@ -14,6 +14,6 @@ namespace Pin.CricketDarts.Core.Interfaces.Services
         Task<ItemResultModel<Player>>GetPlayerByIdAsync(Guid id);
         Task<ItemResultModel<Player>> GetPlayerWithAllThrowsByIdAsync(Guid id);
         Task<ItemResultModel<Player>> CreateAsync(string firstname, string lastname);
-
+        Task<ItemResultModel<Player>> GetApponentPlayerByCurrentPlayerId(Guid id);
     }
 }

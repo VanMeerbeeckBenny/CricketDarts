@@ -5,6 +5,7 @@ using Pin.CricketDarts.Core.Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -94,6 +95,31 @@ namespace Pin.CricketDarts.Core.Services
                     IsSucces = true
                 };
             }
+        }  
+        
+        public async Task<ItemResultModel<Player>>GetApponentPlayerByCurrentPlayerId(Guid id)
+        {
+            var allPlayer = await _playerRepository.GetAllAsync();
+            var valibleCandidated = allPlayer.ToList();
+            var currentPlayer =await _playerRepository.GetByIdAsync(id);
+            valibleCandidated.Remove(currentPlayer);//player can not play agains him self
+            if (currentPlayer == null) return new ItemResultModel<Player> { ErrorMessage = "Player not found!" };
+
+            foreach (Guid matchId in currentPlayer.Matches.Select(m => m.Id))
+            {
+                foreach (var player in allPlayer)
+                {
+                    if (player.Matches.Select(m => m.Id).Contains(matchId))
+                    {
+                        var foundPlayer = valibleCandidated.FirstOrDefault(v => v.Id == player.Id);
+                        valibleCandidated.Remove(foundPlayer);
+                    }
+                }
+            }
+            
+
+            if (!valibleCandidated.Any()) return new ItemResultModel<Player> { ErrorMessage = "No Posible apponent found!" };
+            return new ItemResultModel<Player> { IsSucces = true,Items = valibleCandidated };
         }
 
 
