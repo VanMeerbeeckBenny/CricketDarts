@@ -1,10 +1,11 @@
 ﻿@page "/CommandCenter"
-@inject IPlayerService playerService
+@inject IPlayerService _playerService
 @inject IThrowService _throwService
 @inject NavigationManager navigation
 
  <h3>CommandCenter</h3>
 <input type="button" class="btn btn-primary" @onclick="RedirectToAddPlayer" value="+Add Player"/>
+<input type="button" class="btn btn-primary" @onclick="CreateCurrentMatch" value="New Match" />
 
 @if (allPosibleThrow != null) {
 <div class="d-flex justify-content-between">
@@ -14,34 +15,104 @@
                      OnSelected="AddScore"></DartSegment>
     }
 </div>
+<div class="d-flex justify-content-center mt-5" id="bull-container">
+    <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
+        <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
+    </div>
+    
+</div>
+
+@if(currentMatch != null)
+                {
+                    <p>
+                        <span>@currentMatch.PlayerOne.FirstName @currentMatch.PlayerOne.LastName</span> VS
+                        <span>@currentMatch.PlayerTwo.FirstName @currentMatch.PlayerTwo.LastName</span>
+                    </p>
+                }
 
 
 }
 
 
 @code {
-    private DartsMatchModel currentMatch;
-    private List<ScoresPerNumberModel> allPosibleThrow;
+        private DartsMatchModel currentMatch;
+        private List<ScoresPerNumberModel> allPosibleThrow;
+        private List<ScoreModel> posibleBullThrows;
+        private string error;
 
-    private void RedirectToAddPlayer()
-    {
-        navigation.NavigateTo("/AddPlayer");
-    }
-
-    protected async override Task OnInitializedAsync()
-    {
-        var result = await _throwService.GetAll();
-        if (result.IsSucces)
+        private void RedirectToAddPlayer()
         {
-            var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
-                        .Select(group => group.ToList())
-                        .ToList();
+            navigation.NavigateTo("/AddPlayer");
+        }
 
-            var bull = new List<List<Point>> { groupedPoints[groupedPoints.Count - 1] };
-            groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
-            allPosibleThrow = CreateScorePerNumberModels(groupedPoints);       
+        protected async override Task OnInitializedAsync()
+        {
+            var result = await _throwService.GetAll();
+            if (result.IsSucces)
+            {
+                var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
+                            .Select(group => group.ToList())
+                            .ToList();
+
+                var bull = groupedPoints[groupedPoints.Count - 1];
+                posibleBullThrows = bull.Select(p => new ScoreModel
+                {
+                    Id = p.Id,
+                    Score =(int)p.Score
+                }).ToList();
+
+                groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
+                allPosibleThrow = CreateScorePerNumberModels(groupedPoints);             
+
+            }
 
         }
+
+        private async Task CreateCurrentMatch()
+        {
+            var result = await _playerService.GetAllPlayersAsync();
+            int maxPlayerCount;
+            Random random = new Random();
+            DartsPlayerModel playerOne = new();
+            DartsPlayerModel playerTwo = new();
+            List<DartsPlayerModel> valibleCandidated = new();
+
+            if (result.IsSucces)
+            {
+                maxPlayerCount = result.Items.Count();
+                var players = ConvertToDartsPlayerModel(result.Items.ToList());
+
+                playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+
+                var availeblePlayersResult = await _playerService.GetApponentPlayerByCurrentPlayerId(playerOne.Id);
+                if (availeblePlayersResult.IsSucces)
+                {
+                    valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
+
+                    maxPlayerCount = valibleCandidated.Count();
+                    playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
+                }
+                else error = availeblePlayersResult.ErrorMessage;
+
+
+                currentMatch = new DartsMatchModel
+                {
+                    PlayerOne = playerOne,
+                    PlayerTwo = playerTwo,
+                    IsActiveMatch = true
+            };
+        };
+    }
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player>players)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = new List<ThrowModel>()
+        }).ToList();
     }
 
     private List<ScoresPerNumberModel> CreateScorePerNumberModels(List<List<Point>> groupedPoints)
@@ -70,6 +141,7 @@
     }
 
 }
+
 
 
 
