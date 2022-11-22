@@ -1,20 +1,79 @@
 ﻿@page "/CommandCenter"
 @inject IPlayerService playerService
+@inject IThrowService _throwService
 @inject NavigationManager navigation
 
  <h3>CommandCenter</h3>
 <input type="button" class="btn btn-primary" @onclick="RedirectToAddPlayer" value="+Add Player"/>
 
+@if (allPosibleThrow != null) {
+<div class="d-flex justify-content-between">
+    @foreach (var item in allPosibleThrow)
+    {
+        <DartSegment DataModel="item"
+                     OnSelected="AddScore"></DartSegment>
+    }
+</div>
 
+
+}
 
 
 @code {
     private DartsMatchModel currentMatch;
-
+    private List<ScoresPerNumberModel> allPosibleThrow;
 
     private void RedirectToAddPlayer()
     {
         navigation.NavigateTo("/AddPlayer");
     }
 
+    protected async override Task OnInitializedAsync()
+    {
+        var result = await _throwService.GetAll();
+        if (result.IsSucces)
+        {
+            var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
+                        .Select(group => group.ToList())
+                        .ToList();
+
+            var bull = new List<List<Point>> { groupedPoints[groupedPoints.Count - 1] };
+            groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
+            allPosibleThrow = CreateScorePerNumberModels(groupedPoints);       
+
+        }
+    }
+
+    private List<ScoresPerNumberModel> CreateScorePerNumberModels(List<List<Point>> groupedPoints)
+    {
+        List<ScoresPerNumberModel> allPosibleThrow = new();
+
+        foreach (var group in groupedPoints)
+        {
+            var scorePerModel = new ScoresPerNumberModel
+            {
+                Name = group.FirstOrDefault().OriginalScore.ToString()
+            };
+            scorePerModel.Single = new ScoreModel { Id = group[0].Id, Score = (int)group[0].Score };
+            scorePerModel.Double = new ScoreModel { Id = group[1].Id, Score = (int)group[1].Score };
+            scorePerModel.Triple = new ScoreModel { Id = group[2].Id, Score = (int)group[2].Score };
+            allPosibleThrow.Add(scorePerModel);
+
+        };
+
+        return allPosibleThrow;
+    }
+
+    private void AddScore(ScoreModel score)
+    {
+        var something = score;
+    }
+
 }
+
+
+
+
+
+
+
