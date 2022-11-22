@@ -1,5 +1,10 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
+:root {
+    --colorTriple: #D54848;
+    --colorSingle: black;
+    --colorHoverSingle: #232222;
+    --colorHoverTripeAndDouble: #F23535;
+}
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -59,6 +64,90 @@ a, .btn-link {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+.triple, .double, #inner-bull {
+    background-color: var(--colorTriple);
+}
+
+.triple:hover,.double:hover,#inner-bull:hover{
+    background-color:var(--colorHoverTripeAndDouble);
+}
+.first-single:hover,.last-single:hover{
+    background-color:var(--colorHoverSingle);
+}
+.first-single {
+    border-top:4px solid gray;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    background-color:black;
+    height: 120px;
+    width:100%;
+    top:30px;
+    position:absolute;
+}
+
+.last-single {
+    border-top: 4px solid gray;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    background-color: black;
+    height: 230px;
+    width: 100%;
+    top: 170px;
+    position: absolute;
+}
+.single{
+    background-color:black;
+}
+
+.pie-chart {  
+    position: relative;
+    border-top-left-radius: 45%;
+    border-top-right-radius: 45%;
+    background-color: black;
+    width: 200px;
+    height: 400px;
+    clip-path: polygon(100% 0%, 0% 0%, 50% 100%);
+}
+
+.triple.segment {
+    border-top: 6px solid gray;
+    height: 60px;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+}
+
+.double.segment {
+    border-top: 4px solid gray;
+    border-top-left-radius: 90%;
+    border-top-right-radius: 90%;
+    top: 140px;
+    height: 60px;
+    width: 100%;
+    position: absolute;
+}
+
+#outer-bull {
+    border: 4px solid gray;
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    background-color: darkolivegreen;
+}
+
+#outer-bull:hover {
+    background-color: darkgreen;
+}
+#inner-bull {
+    border: 4px solid gray;
+    height: 90px;
+    width: 90px;
+    border-radius: 50%;
+}
+
+#inner-bull:hover + #outer-bull {
+    background-color: darkolivegreen;
+}
