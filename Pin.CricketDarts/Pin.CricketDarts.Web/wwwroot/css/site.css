@@ -76,13 +76,12 @@ a, .btn-link {
     background-color:var(--colorHoverTripeAndDouble);
 }
 .first-single:hover,.last-single:hover{
-    background-color:var(--colorHoverSingle);
+    background-color:black;
 }
 .first-single {
     border-top:4px solid gray;
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
-    background-color:black;
     height: 120px;
     width:100%;
     top:30px;
@@ -93,14 +92,14 @@ a, .btn-link {
     border-top: 4px solid gray;
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
-    background-color: black;
     height: 230px;
     width: 100%;
     top: 170px;
     position: absolute;
+    z-index:6;
 }
-.single{
-    background-color:black;
+.last-single,.first-single {
+    background-color: var(--colorHoverSingle);
 }
 
 .pie-chart {  
@@ -116,18 +115,21 @@ a, .btn-link {
 .triple.segment {
     border-top: 6px solid gray;
     height: 60px;
+    width: 100%;
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
+    position: absolute;
+    top: 140px;
+    z-index: 5;
 }
 
-.double.segment {
+.double.segment {   
     border-top: 4px solid gray;
     border-top-left-radius: 90%;
     border-top-right-radius: 90%;
-    top: 140px;
     height: 60px;
-    width: 100%;
-    position: absolute;
+    
+  
 }
 
 #outer-bull {
