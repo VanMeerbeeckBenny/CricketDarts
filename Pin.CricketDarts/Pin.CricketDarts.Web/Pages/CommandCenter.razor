@@ -35,72 +35,64 @@
 
 
 @code {
-        private DartsMatchModel currentMatch;
-        private List<ScoresPerNumberModel> allPosibleThrow;
-        private List<ScoreModel> posibleBullThrows;
-        private string error;
+    private DartsMatchModel currentMatch;
+    private List<ScoresPerNumberModel> allPosibleThrow;
+    private List<ScoreModel> posibleBullThrows;
+    private string error;
 
-        private void RedirectToAddPlayer()
+    private void RedirectToAddPlayer()
+    {
+        navigation.NavigateTo("/AddPlayer");
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var result = await _throwService.GetAll();
+        if (result.IsSucces)
         {
-            navigation.NavigateTo("/AddPlayer");
+            var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
+                        .Select(group => group.ToList())
+                        .ToList();
+
+            var bull = groupedPoints[groupedPoints.Count - 1];
+            posibleBullThrows = bull.Select(p => new ScoreModel
+            {
+                Id = p.Id,
+                Score =(int)p.Score
+            }).ToList();
+
+            groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
+            allPosibleThrow = CreateScorePerNumberModels(groupedPoints);
+
         }
 
-        protected async override Task OnInitializedAsync()
+    }
+
+    private async Task CreateCurrentMatch()
+    {
+        var result = await _playerService.GetAllPlayersAsync();
+        int maxPlayerCount;
+        Random random = new Random();
+        currentMatch = new DartsMatchModel { IsActiveMatch = true };
+
+        List<DartsPlayerModel> valibleCandidated = new();
+
+        if (result.IsSucces)
         {
-            var result = await _throwService.GetAll();
-            if (result.IsSucces)
+            maxPlayerCount = result.Items.Count();
+            var players = ConvertToDartsPlayerModel(result.Items.ToList());
+
+            currentMatch.PlayerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+
+            var availeblePlayersResult = await _playerService.GetApponentByPlayerId(currentMatch.PlayerOne.Id);
+            if (availeblePlayersResult.IsSucces)
             {
-                var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
-                            .Select(group => group.ToList())
-                            .ToList();
+                valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
 
-                var bull = groupedPoints[groupedPoints.Count - 1];
-                posibleBullThrows = bull.Select(p => new ScoreModel
-                {
-                    Id = p.Id,
-                    Score =(int)p.Score
-                }).ToList();
-
-                groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
-                allPosibleThrow = CreateScorePerNumberModels(groupedPoints);             
-
+                maxPlayerCount = valibleCandidated.Count();
+                currentMatch.PlayerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
             }
-
-        }
-
-        private async Task CreateCurrentMatch()
-        {
-            var result = await _playerService.GetAllPlayersAsync();
-            int maxPlayerCount;
-            Random random = new Random();
-            DartsPlayerModel playerOne = new();
-            DartsPlayerModel playerTwo = new();
-            List<DartsPlayerModel> valibleCandidated = new();
-
-            if (result.IsSucces)
-            {
-                maxPlayerCount = result.Items.Count();
-                var players = ConvertToDartsPlayerModel(result.Items.ToList());
-
-                playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
-
-                var availeblePlayersResult = await _playerService.GetApponentPlayerByCurrentPlayerId(playerOne.Id);
-                if (availeblePlayersResult.IsSucces)
-                {
-                    valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
-
-                    maxPlayerCount = valibleCandidated.Count();
-                    playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
-                }
-                else error = availeblePlayersResult.ErrorMessage;
-
-
-                currentMatch = new DartsMatchModel
-                {
-                    PlayerOne = playerOne,
-                    PlayerTwo = playerTwo,
-                    IsActiveMatch = true
-            };
+            else error = availeblePlayersResult.ErrorMessage;
         };
     }
 

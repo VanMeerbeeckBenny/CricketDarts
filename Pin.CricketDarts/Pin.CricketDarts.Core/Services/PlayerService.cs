@@ -97,7 +97,7 @@ namespace Pin.CricketDarts.Core.Services
             }
         }  
         
-        public async Task<ItemResultModel<Player>>GetApponentPlayerByCurrentPlayerId(Guid id)
+        public async Task<ItemResultModel<Player>> GetApponentByPlayerId(Guid id)
         {
             var allPlayer = await _playerRepository.GetAllAsync();
             var valibleCandidated = allPlayer.ToList();
