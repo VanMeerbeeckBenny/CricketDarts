@@ -46,6 +46,7 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OriginalScore = table.Column<int>(type: "int", nullable: false),
                     Score = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -115,8 +116,8 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                 columns: new[] { "Id", "IsActiveGame", "PlayerOneScore", "PlayerTwoScore", "TimeStamp" },
                 values: new object[,]
                 {
-                    { new Guid("16d9d127-f6ec-453e-86e6-188b1f9d91ef"), false, 0, 0, new DateTime(2022, 11, 21, 12, 58, 38, 606, DateTimeKind.Local).AddTicks(5976) },
-                    { new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), false, 0, 0, new DateTime(2022, 11, 21, 10, 58, 38, 606, DateTimeKind.Local).AddTicks(5937) }
+                    { new Guid("5cd5798f-c2db-4481-b98a-e604eaec6730"), false, 0, 0, new DateTime(2022, 11, 22, 14, 3, 43, 61, DateTimeKind.Local).AddTicks(7119) },
+                    { new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), false, 0, 0, new DateTime(2022, 11, 22, 12, 3, 43, 61, DateTimeKind.Local).AddTicks(7084) }
                 });
 
             migrationBuilder.InsertData(
@@ -124,35 +125,35 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                 columns: new[] { "Id", "Firstname", "Lastname" },
                 values: new object[,]
                 {
-                    { new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637"), "Benny", "Van Meerbeeck" },
-                    { new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2"), "Arlette", "Verheugen" }
+                    { new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5"), "Benny", "Van Meerbeeck" },
+                    { new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7"), "Arlette", "Verheugen" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Throws",
-                columns: new[] { "Id", "Score" },
+                columns: new[] { "Id", "OriginalScore", "Score" },
                 values: new object[,]
                 {
-                    { new Guid("383206d0-2a01-474f-b8f7-ec22ac33950f"), 50 },
-                    { new Guid("3f975c51-6eb6-4852-8bc5-47a0e5ac2ff1"), 51 },
-                    { new Guid("59e8b242-2a8e-4e52-85ad-a9b6e47882a9"), 48 },
-                    { new Guid("5ab532fe-396b-446c-8470-097eb17c927e"), 16 },
-                    { new Guid("735c406a-18ca-4608-850e-f389ac4c4bd0"), 34 },
-                    { new Guid("7c3bf391-72fc-4b9b-8da3-22bdc8157a31"), 36 },
-                    { new Guid("7fff1dd5-14f5-4830-83b4-b7e15043a55d"), 38 },
-                    { new Guid("8a4812eb-df35-4af9-a039-4f60c3c8bd4b"), 17 },
-                    { new Guid("8f622ae8-cf51-4690-b892-fcd17a6ae7d5"), 32 },
-                    { new Guid("a8a71ea6-95e2-4ee5-a7b2-56268de3f945"), 60 },
-                    { new Guid("b02bafbd-5863-42d4-a6a8-f14c36b4a952"), 40 },
-                    { new Guid("b75c9bf8-e5ab-440c-8e26-1772e13b9f1d"), 15 },
-                    { new Guid("b95ea2ac-e098-47fb-a0e7-f96926976868"), 18 },
-                    { new Guid("c2ebc31c-182c-4d58-b891-6fc075d664b2"), 54 },
-                    { new Guid("c2fdc080-6af5-4568-b3e9-ed5dec946c2b"), 25 },
-                    { new Guid("cbdf7449-7624-42cc-99ae-112d1fdde073"), 57 },
-                    { new Guid("d624c2a9-bc3e-4823-9dad-7da90fcd554f"), 20 },
-                    { new Guid("e3d6ed56-0dcd-4818-a087-40ad3fbbcb65"), 19 },
-                    { new Guid("f5ea09e2-419d-45a0-b3ad-2a77e781a4bf"), 45 },
-                    { new Guid("fb6495e0-01ff-4bf5-a919-b6f8e7dc4fd6"), 30 }
+                    { new Guid("045ab608-a24a-4269-b2f6-d04bfae64514"), 16, 32 },
+                    { new Guid("12f5f777-661b-43a3-aa4a-d3bdd71debac"), 18, 18 },
+                    { new Guid("24bc28f6-c105-44a6-8809-fcf2096b0e27"), 17, 17 },
+                    { new Guid("3268cd2c-49a8-4d90-8f1e-029fc9e83585"), 19, 57 },
+                    { new Guid("3a002642-4de8-4645-b9aa-0098f7f45622"), 25, 25 },
+                    { new Guid("4f891845-faa8-4355-8488-aa85ec1394ca"), 15, 15 },
+                    { new Guid("74929ccf-34e1-4e36-8b70-76a63a724da5"), 17, 34 },
+                    { new Guid("77263662-d6d7-44bd-a4b3-622238c42b32"), 18, 54 },
+                    { new Guid("7ee2d6f0-42d1-4e61-8132-0d0fa05aa5cb"), 25, 50 },
+                    { new Guid("9c1f3bec-3ec3-4196-87a0-83674573928a"), 18, 36 },
+                    { new Guid("9e4f032b-b2ba-4c2a-87f9-a0bc919211af"), 17, 51 },
+                    { new Guid("a2064ea3-4e50-4b04-a07b-920efee29f53"), 20, 20 },
+                    { new Guid("a73ccae1-1aa1-480b-98c1-2d56d6982119"), 15, 45 },
+                    { new Guid("a764654b-de5e-41a0-b8c1-b5f0b376607d"), 20, 60 },
+                    { new Guid("d12c7a1a-0587-4023-b509-8f8f14d60e1d"), 16, 48 },
+                    { new Guid("d4eca901-88d6-4869-9e94-22fd87647d57"), 19, 19 },
+                    { new Guid("dacbb0ea-4eb4-407f-9ab9-301649935540"), 19, 38 },
+                    { new Guid("db2c392b-6280-4ec6-a915-54f3402178a6"), 15, 30 },
+                    { new Guid("e48db23d-4342-44c9-b5da-5335a8e057bf"), 20, 40 },
+                    { new Guid("fc89f956-b077-465b-a012-e354e6e74382"), 16, 16 }
                 });
 
             migrationBuilder.InsertData(
@@ -160,10 +161,10 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                 columns: new[] { "MatchesId", "PlayersId" },
                 values: new object[,]
                 {
-                    { new Guid("16d9d127-f6ec-453e-86e6-188b1f9d91ef"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637") },
-                    { new Guid("16d9d127-f6ec-453e-86e6-188b1f9d91ef"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2") },
-                    { new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637") },
-                    { new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2") }
+                    { new Guid("5cd5798f-c2db-4481-b98a-e604eaec6730"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5") },
+                    { new Guid("5cd5798f-c2db-4481-b98a-e604eaec6730"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7") },
+                    { new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5") },
+                    { new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7") }
                 });
 
             migrationBuilder.InsertData(
@@ -171,14 +172,14 @@ namespace Pin.CricketDarts.Infrastructure.Migrations
                 columns: new[] { "Id", "MatchId", "PlayerId", "ThrowId", "TimeStamp" },
                 values: new object[,]
                 {
-                    { new Guid("1101573f-3868-46bd-9fc4-0358fd841080"), new Guid("16d9d127-f6ec-453e-86e6-188b1f9d91ef"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2"), new Guid("8f622ae8-cf51-4690-b892-fcd17a6ae7d5"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("4d6ac8b2-6cef-411f-89c4-079c9553eb8f"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637"), new Guid("fb6495e0-01ff-4bf5-a919-b6f8e7dc4fd6"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("7cb2557f-4264-42ad-8411-a864de385c33"), new Guid("16d9d127-f6ec-453e-86e6-188b1f9d91ef"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637"), new Guid("b75c9bf8-e5ab-440c-8e26-1772e13b9f1d"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("987eadfc-fd57-4ef0-a3b5-98ba0360afcc"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2"), new Guid("3f975c51-6eb6-4852-8bc5-47a0e5ac2ff1"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("b24f9f0d-7e4e-436c-8147-75922ae670f2"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637"), new Guid("8f622ae8-cf51-4690-b892-fcd17a6ae7d5"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("cb19d43c-e0b5-4dd0-a5cc-5c4a07987f0d"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2"), new Guid("b02bafbd-5863-42d4-a6a8-f14c36b4a952"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("f33b7cf3-aaec-478c-a0d4-a858d74d5a32"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("2b095fe1-8b94-4cd9-bfa9-d12cecff3637"), new Guid("8a4812eb-df35-4af9-a039-4f60c3c8bd4b"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("f7f3a8ca-291f-47a3-89bc-b7d80ffbfd8b"), new Guid("fe34ff9b-c91f-4589-bd99-60849ddef2cc"), new Guid("ab4f02c5-cd21-439d-9b3f-68d3c5699ef2"), new Guid("383206d0-2a01-474f-b8f7-ec22ac33950f"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("311b6256-76e8-4860-afd6-ccc5a7f95b31"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5"), new Guid("24bc28f6-c105-44a6-8809-fcf2096b0e27"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("3203502b-1966-406f-946f-46642a675095"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7"), new Guid("e48db23d-4342-44c9-b5da-5335a8e057bf"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("382bac32-5ad4-4bee-8948-28ad4275a7b6"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7"), new Guid("7ee2d6f0-42d1-4e61-8132-0d0fa05aa5cb"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("3e14936e-7ab3-4aa7-97cd-27f8231435a8"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5"), new Guid("db2c392b-6280-4ec6-a915-54f3402178a6"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("86a00c7f-a3ed-475c-9682-cec441e2d279"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5"), new Guid("045ab608-a24a-4269-b2f6-d04bfae64514"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("8e7e5a4b-ae8e-40a9-8f8d-eec5dd7f752f"), new Guid("5cd5798f-c2db-4481-b98a-e604eaec6730"), new Guid("6cb78aa5-a80e-4c05-8f87-c443cc03e1d5"), new Guid("4f891845-faa8-4355-8488-aa85ec1394ca"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("8f83843e-432d-451c-94d0-f83cac83e871"), new Guid("5cd5798f-c2db-4481-b98a-e604eaec6730"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7"), new Guid("045ab608-a24a-4269-b2f6-d04bfae64514"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("ada10a6d-e065-429d-a8ad-68e21204ae9e"), new Guid("f58a9951-6c7e-4ae8-9a61-deabbfff2ff1"), new Guid("e8607328-584e-4f53-91c8-27bc9bccf1c7"), new Guid("9e4f032b-b2ba-4c2a-87f9-a0bc919211af"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.CreateIndex(
