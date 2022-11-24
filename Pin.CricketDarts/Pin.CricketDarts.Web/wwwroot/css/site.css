@@ -178,3 +178,6 @@ font-weight:bolder;
 .score{
     width:55%;
 }
+.error-message{
+    border-radius:5px;
+}
