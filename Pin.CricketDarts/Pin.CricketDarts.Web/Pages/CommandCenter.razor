@@ -3,9 +3,11 @@
 @inject IThrowService _throwService
 @inject NavigationManager navigation
 
-<input type="button" class="btn btn-primary me-2 mb-5" @onclick="RedirectToAddPlayer" value="+Add Player"/>
-<input type="button" class="btn btn-primary mb-5" @onclick="CreateCurrentMatch" value="New Match" />
+<input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
+<input type="button" class="btn btn-primary mb-3" @onclick="CreateCurrentMatch" value="New Match" />
 
+<Error ErrorMessage="@error"></Error>
+<LoadingScreen IsBusy="@isBussy"></LoadingScreen>
 @if (allPosibleThrow != null)
 {
 
@@ -24,15 +26,14 @@
 
         </div>
     </div>
-   
+
     @if (currentMatch != null)
     {
 
         <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                    PosibleBullThrows ="posibleBullThrows"
+                    PosibleBullThrows="posibleBullThrows"
                     CurrentMatch="currentMatch"
-                    CurrentScore="currentScore"
-                    ></ScoreBoard>
+                    CurrentScore="currentScore"></ScoreBoard>
     }
 }
 
@@ -42,7 +43,8 @@
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
     private ScoreModel currentScore;
-    private string error;
+    private string error = "";
+    private bool isBussy;
 
     private void RedirectToAddPlayer()
     {
@@ -51,6 +53,7 @@
 
     protected async override Task OnInitializedAsync()
     {
+        isBussy = true;
         var result = await _throwService.GetAll();
         if (result.IsSucces)
         {
@@ -62,12 +65,13 @@
             posibleBullThrows = bull.Select(p => new ScoreModel
             {
                 Id = p.Id,
-                Score =(int)p.Score,
+                Score = (int)p.Score,
                 BaseScore = (int)p.OriginalScore,
             }).ToList();
 
             groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
             allPosibleThrow = CreateScorePerNumberModels(groupedPoints);
+            isBussy = false;
 
         }
 
@@ -75,6 +79,7 @@
 
     private async Task CreateCurrentMatch()
     {
+        error = String.Empty;
         var result = await _playerService.GetAllPlayersAsync();
         int maxPlayerCount;
         Random random = new Random();
@@ -102,7 +107,7 @@
         };
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player>players)
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
     {
         return players.Select(p => new DartsPlayerModel
         {
@@ -123,18 +128,27 @@
             {
                 Name = group.FirstOrDefault().OriginalScore.ToString()
             };
-            scorePerModel.Single = new ScoreModel { Id = group[0].Id,
+            scorePerModel.Single = new ScoreModel
+            {
+                Id = group[0].Id,
                 Score = (int)group[0].Score,
                 BaseScore = (int)group[0].OriginalScore,
-                Name = group[0].OriginalScore.ToString()};
-            scorePerModel.Double = new ScoreModel { Id = group[1].Id,
+                Name = group[0].OriginalScore.ToString()
+            };
+            scorePerModel.Double = new ScoreModel
+            {
+                Id = group[1].Id,
                 Score = (int)group[1].Score,
                 BaseScore = (int)group[1].OriginalScore,
-                Name = group[1].OriginalScore.ToString()};
-            scorePerModel.Triple = new ScoreModel { Id = group[2].Id,
+                Name = group[1].OriginalScore.ToString()
+            };
+            scorePerModel.Triple = new ScoreModel
+            {
+                Id = group[2].Id,
                 Score = (int)group[2].Score,
                 BaseScore = (int)group[2].OriginalScore,
-                Name = group[2].OriginalScore.ToString()};
+                Name = group[2].OriginalScore.ToString()
+            };
             allPosibleThrow.Add(scorePerModel);
 
         };
@@ -144,21 +158,21 @@
 
     private void AddScore(ScoreModel score)
     {
-        var something = score;
-        if (currentMatch.PlayerOne.IsActiveTurn)
+        if (currentMatch != null)
         {
-            var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now};
-            currentMatch.PlayerOne.Throws.Add(newThrow);
-            var currentHits = currentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
+            var currentPlayer = currentMatch.PlayerOne.IsActiveTurn == true ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+            var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now };
+            currentPlayer.Throws.Add(newThrow);
+            var currentHits = currentPlayer.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
             currentScore = score;
-
-
             StateHasChanged();
+
         }
+        else error = "Please create a match!";
 
     }
 
-   
+
 
 }
 
