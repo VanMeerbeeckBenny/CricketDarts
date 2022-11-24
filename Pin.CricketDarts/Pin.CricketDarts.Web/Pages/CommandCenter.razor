@@ -3,26 +3,28 @@
 @inject IThrowService _throwService
 @inject NavigationManager navigation
 
- <h3>CommandCenter</h3>
-<input type="button" class="btn btn-primary" @onclick="RedirectToAddPlayer" value="+Add Player"/>
-<input type="button" class="btn btn-primary" @onclick="CreateCurrentMatch" value="New Match" />
+<input type="button" class="btn btn-primary me-2 mb-5" @onclick="RedirectToAddPlayer" value="+Add Player"/>
+<input type="button" class="btn btn-primary mb-5" @onclick="CreateCurrentMatch" value="New Match" />
 
 @if (allPosibleThrow != null)
 {
-    <div class="d-flex justify-content-between">
-        @foreach (var item in allPosibleThrow)
-        {
-            <DartSegment DataModel="item"
-                         OnSelected="AddScore"></DartSegment>
-        }
-    </div>
-    <div class="d-flex justify-content-center mt-5" id="bull-container">
-        <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
-            <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
-        </div>
-    
-    </div>
 
+    <div>
+        <div class="d-flex justify-content-between flex-wrap">
+            @foreach (var item in allPosibleThrow)
+            {
+                <DartSegment DataModel="item"
+                             OnSelected="AddScore"></DartSegment>
+            }
+        </div>
+        <div class="d-flex justify-content-center mt-5" id="bull-container">
+            <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
+                <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
+            </div>
+
+        </div>
+    </div>
+   
     @if (currentMatch != null)
     {
 

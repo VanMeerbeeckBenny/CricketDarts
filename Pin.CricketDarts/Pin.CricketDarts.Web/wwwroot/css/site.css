@@ -107,8 +107,8 @@ a, .btn-link {
     border-top-left-radius: 45%;
     border-top-right-radius: 45%;
     background-color: black;
-    width: 200px;
-    height: 400px;
+    width: 150px;
+    height: 200px;
     clip-path: polygon(100% 0%, 0% 0%, 50% 100%);
 }
 
@@ -134,8 +134,8 @@ a, .btn-link {
 
 #outer-bull {
     border: 4px solid gray;
-    height: 200px;
-    width: 200px;
+    height: 100px;
+    width: 100px;
     border-radius: 50%;
     background-color: darkolivegreen;
 }
@@ -145,11 +145,23 @@ a, .btn-link {
 }
 #inner-bull {
     border: 4px solid gray;
-    height: 90px;
-    width: 90px;
+    height: 50px;
+    width: 50px;
     border-radius: 50%;
 }
 
 #inner-bull:hover + #outer-bull {
     background-color: darkolivegreen;
+}
+.far.fa-times-circle {
+    font-size: 1.2em;
+}
+.fas.fa-slash{
+font-size:0.7em;
+padding-left:5px;
+font-weight:bolder;
+}
+
+.number{
+    width:40px;
 }
