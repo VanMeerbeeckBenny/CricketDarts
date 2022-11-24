@@ -3,10 +3,12 @@
         <div class="d-flex flex-row w-100">
             <div class="playerOneSucces w-50 my-border-bottom">
                 <span>@CurrentMatch.PlayerOne.FirstName @CurrentMatch.PlayerOne.LastName</span>
+                <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)"/>
             </div>
             <div class="number-empty my-border-bottom"></div>
             <div class="playerTwoSucces w-50 ps-2 my-border-bottom">
                 <span>@CurrentMatch.PlayerTwo.FirstName @CurrentMatch.PlayerTwo.LastName</span>
+                <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerTwo)" />
             </div>
         </div>
         @if (CurrentMatch != null)
@@ -36,14 +38,14 @@
 
 
 @code {
-        [Parameter]
-        public DartsMatchModel CurrentMatch { get; set; }
-        [Parameter]
-        public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
-        [Parameter]
-        public List<ScoreModel> PosibleBullThrows { get; set; }
-        [Parameter]
-        public ScoreModel CurrentScore { get; set; }
+    [Parameter]
+    public DartsMatchModel CurrentMatch { get; set; }
+    [Parameter]
+    public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
+    [Parameter]
+    public List<ScoreModel> PosibleBullThrows { get; set; }
+    [Parameter]
+    public ScoreModel CurrentScore { get; set; }
     private DartsPlayerModel currentPlayer;
 
 
@@ -52,6 +54,13 @@
         base.OnParametersSet();
         currentPlayer = CurrentMatch.PlayerOne.IsActiveTurn ? CurrentMatch.PlayerOne : CurrentMatch.PlayerTwo;
         AddScore(currentPlayer);
+
+    }
+    private void SetActivePlayer(DartsPlayerModel playerToBeActive)
+    {
+        playerToBeActive.IsActiveTurn = true;
+        var playerToBeDeactivated = CurrentMatch.PlayerOne == playerToBeActive ?  CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
+        playerToBeDeactivated.IsActiveTurn = false;
 
     }
 
@@ -64,7 +73,7 @@
         for (int i = 0; i < playerOnThrow.Count; i++)
         {
             var currentThrow = playerOnThrow.OrderByDescending(t => t.TimeStamp).ToList()[0];
-            var allThrowOfNumber = CurrentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == number.BaseScore).ToList();
+            var allThrowOfNumber = player.Throws.Where(t => t.BaseNumber == number.BaseScore).ToList();
             int total = allThrowOfNumber.Sum(a => a.Throw);
             amountOfHits = total / number.BaseScore;
 
@@ -81,7 +90,7 @@
 
     }
 
-    private bool CheckPlayerEligibilityForAddingScore(DartsPlayerModel player, ScoreModel number)
+    private bool CheckPlayerEligibiletyForAddingScore(DartsPlayerModel player, ScoreModel number)
     {
 
         DartsPlayerModel opponent = CurrentMatch.PlayerOne == player ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
@@ -110,12 +119,12 @@
     private void AddScore(DartsPlayerModel player)
     {
         if (player.Throws.Any())
-        {            
-            var allThrowOfNumber = CurrentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == CurrentScore.BaseScore).ToList();
+        {
+            var allThrowOfNumber = player.Throws.Where(t => t.BaseNumber == CurrentScore.BaseScore).ToList();
             int total = allThrowOfNumber.Sum(a => a.Throw);
             int amountOfHits = total / CurrentScore.BaseScore;
 
-            if (amountOfHits > 3)
+            if (amountOfHits >= 3)
             {
                 foreach (var property in player.FinischedNumbers.GetType().GetProperties())
                 {
@@ -123,7 +132,7 @@
                     {
                         bool isFinischedBefore = (bool)property.GetValue(player.FinischedNumbers);
                         property.SetValue(player.FinischedNumbers, true);
-                        bool shouldGetScore = CheckPlayerEligibilityForAddingScore(player, CurrentScore);
+                        bool shouldGetScore = CheckPlayerEligibiletyForAddingScore(player, CurrentScore);
                         if (shouldGetScore)
                         {
                             if (isFinischedBefore) player.Score += CurrentScore.Score;
