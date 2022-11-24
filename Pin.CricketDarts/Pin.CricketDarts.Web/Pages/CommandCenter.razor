@@ -31,6 +31,7 @@
         <ScoreBoard AllPosibleThrow="allPosibleThrow"
                     PosibleBullThrows ="posibleBullThrows"
                     CurrentMatch="currentMatch"
+                    CurrentScore="currentScore"
                     ></ScoreBoard>
     }
 }
@@ -40,6 +41,7 @@
     private DartsMatchModel currentMatch;
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
+    private ScoreModel currentScore;
     private string error;
 
     private void RedirectToAddPlayer()
@@ -121,9 +123,18 @@
             {
                 Name = group.FirstOrDefault().OriginalScore.ToString()
             };
-            scorePerModel.Single = new ScoreModel { Id = group[0].Id, Score = (int)group[0].Score,BaseScore = (int)group[0].OriginalScore };
-            scorePerModel.Double = new ScoreModel { Id = group[1].Id, Score = (int)group[1].Score,BaseScore = (int)group[1].OriginalScore };
-            scorePerModel.Triple = new ScoreModel { Id = group[2].Id, Score = (int)group[2].Score,BaseScore = (int)group[2].OriginalScore };
+            scorePerModel.Single = new ScoreModel { Id = group[0].Id,
+                Score = (int)group[0].Score,
+                BaseScore = (int)group[0].OriginalScore,
+                Name = group[0].OriginalScore.ToString()};
+            scorePerModel.Double = new ScoreModel { Id = group[1].Id,
+                Score = (int)group[1].Score,
+                BaseScore = (int)group[1].OriginalScore,
+                Name = group[1].OriginalScore.ToString()};
+            scorePerModel.Triple = new ScoreModel { Id = group[2].Id,
+                Score = (int)group[2].Score,
+                BaseScore = (int)group[2].OriginalScore,
+                Name = group[2].OriginalScore.ToString()};
             allPosibleThrow.Add(scorePerModel);
 
         };
@@ -139,11 +150,15 @@
             var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now};
             currentMatch.PlayerOne.Throws.Add(newThrow);
             var currentHits = currentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
-     
+            currentScore = score;
+
+
             StateHasChanged();
         }
 
     }
+
+   
 
 }
 
