@@ -162,6 +162,19 @@ padding-left:5px;
 font-weight:bolder;
 }
 
-.number{
+.number {
+    width: 40px;
+    height: 40px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+.number-empty{
     width:40px;
+}
+
+.my-border-bottom{
+   border-bottom: 2px solid red !important;
+}
+.score{
+    width:55%;
 }
