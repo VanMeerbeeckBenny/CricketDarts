@@ -13,6 +13,10 @@ namespace Pin.CricketDarts.Web.Models
         public int Score { get; set; }
         public List<ThrowModel> Throws { get; set; }
         public bool IsActiveTurn { get; set; }
+
+        public FinischedNumbersModel FinischedNumbers { get; set; } = new();
+
+
     }
 }
 
