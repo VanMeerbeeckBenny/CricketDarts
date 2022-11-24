@@ -28,7 +28,7 @@
         <div class="mt-2 my-border-bottom"><h5>Score</h5></div>
         <div class="d-flex flex-row w-100 pb-2">
             <div class="w-50">@CurrentMatch.PlayerOne.Score</div>
-            <div class="w-50 ps-5">@CurrentMatch.PlayerOne.Score</div>
+            <div class="w-50 ps-5">@CurrentMatch.PlayerTwo.Score</div>
         </div>
 
     </div>
@@ -36,17 +36,22 @@
 
 
 @code {
-    [Parameter]
-    public DartsMatchModel CurrentMatch { get; set; }
-    [Parameter]
-    public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
-    [Parameter]
-    public List<ScoreModel> PosibleBullThrows { get; set; }
+        [Parameter]
+        public DartsMatchModel CurrentMatch { get; set; }
+        [Parameter]
+        public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
+        [Parameter]
+        public List<ScoreModel> PosibleBullThrows { get; set; }
+        [Parameter]
+        public ScoreModel CurrentScore { get; set; }
+    private DartsPlayerModel currentPlayer;
 
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        currentPlayer = CurrentMatch.PlayerOne.IsActiveTurn ? CurrentMatch.PlayerOne : CurrentMatch.PlayerTwo;
+        AddScore(currentPlayer);
 
     }
 
@@ -58,8 +63,8 @@
 
         for (int i = 0; i < playerOnThrow.Count; i++)
         {
-            var currentThrow = playerOnThrow[i];
-            var allThrowOfNumber = CurrentMatch.PlayerOne.Throws.Where(t => currentThrow.TimeStamp <= t.TimeStamp && t.BaseNumber == number.BaseScore).ToList();
+            var currentThrow = playerOnThrow.OrderByDescending(t => t.TimeStamp).ToList()[0];
+            var allThrowOfNumber = CurrentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == number.BaseScore).ToList();
             int total = allThrowOfNumber.Sum(a => a.Throw);
             amountOfHits = total / number.BaseScore;
 
@@ -68,12 +73,67 @@
                 case 0: result = (MarkupString) "<span></span>"; break;
                 case 1: result = (MarkupString) "<i class=\"fas fa-slash\"></i>"; break;
                 case 2: result = (MarkupString) "<i class=\"fas fa-times ps-1\"></i>"; break;
-                default: result =(MarkupString)"<i class=\"far fa-times-circle\"></i>"; break;
+                default: result = (MarkupString)"<i class=\"far fa-times-circle\"></i>";break;
             }
-            return result;
         }
 
         return result;
 
     }
+
+    private bool CheckPlayerEligibilityForAddingScore(DartsPlayerModel player, ScoreModel number)
+    {
+
+        DartsPlayerModel opponent = CurrentMatch.PlayerOne == player ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
+        bool shouldGetScore = false;
+
+        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+        {
+            if (property.Name == number.Name)
+            {
+                foreach (var opponentProperty in opponent.FinischedNumbers.GetType().GetProperties())
+                {
+                    if (property.Name == opponentProperty.Name &&
+                        (bool)property.GetValue(player.FinischedNumbers) == true && (bool)opponentProperty.GetValue(opponent.FinischedNumbers) == false)
+                    {
+                        shouldGetScore = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return shouldGetScore;
+    }
+
+    private void AddScore(DartsPlayerModel player)
+    {
+        if (player.Throws.Any())
+        {            
+            var allThrowOfNumber = CurrentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == CurrentScore.BaseScore).ToList();
+            int total = allThrowOfNumber.Sum(a => a.Throw);
+            int amountOfHits = total / CurrentScore.BaseScore;
+
+            if (amountOfHits > 3)
+            {
+                foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+                {
+                    if (property.Name == CurrentScore.Name)
+                    {
+                        bool isFinischedBefore = (bool)property.GetValue(player.FinischedNumbers);
+                        property.SetValue(player.FinischedNumbers, true);
+                        bool shouldGetScore = CheckPlayerEligibilityForAddingScore(player, CurrentScore);
+                        if (shouldGetScore)
+                        {
+                            if (isFinischedBefore) player.Score += CurrentScore.Score;
+                            else player.Score += total - CurrentScore.BaseScore * 3;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
 }
