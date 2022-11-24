@@ -19,13 +19,13 @@
                 <div class="d-flex flex-row">
                     <div class="playerOneSucces w-50">@CheckThrows(CurrentMatch.PlayerOne, number.Single)</div>
                     <div class="number text-center">@number.Single.Score</div>
-                    <div class="playerTwoSucces w-50">@CheckThrows(CurrentMatch.PlayerTwo, number.Single)</div>
+                    <div class="playerTwoSucces w-50 ps-1">@CheckThrows(CurrentMatch.PlayerTwo, number.Single)</div>
                 </div>
             }}
         <div class="d-flex flex-row">
             <div class="playerOneSucces w-50">@CheckThrows(CurrentMatch.PlayerOne, PosibleBullThrows[0])</div>
             <div class="number text-center">Bull</div>
-            <div class="playerTwoSucces w-50">@CheckThrows(CurrentMatch.PlayerTwo, PosibleBullThrows[0])</div>
+            <div class="playerTwoSucces w-50 ps-1">@CheckThrows(CurrentMatch.PlayerTwo, PosibleBullThrows[0])</div>
         </div>
         <div class="mt-2 my-border-bottom"><h5>Score</h5></div>
         <div class="d-flex flex-row w-100 pb-2">
@@ -98,7 +98,7 @@
 
         foreach (var property in player.FinischedNumbers.GetType().GetProperties())
         {
-            if (property.Name == number.Name)
+            if (property.Name == number.Name || number.Name.Contains(property.Name)) //uitzondering voor bull
             {
                 foreach (var opponentProperty in opponent.FinischedNumbers.GetType().GetProperties())
                 {
@@ -128,7 +128,8 @@
             {
                 foreach (var property in player.FinischedNumbers.GetType().GetProperties())
                 {
-                    if (property.Name == CurrentScore.Name)
+
+                    if (property.Name == CurrentScore.Name || CurrentScore.Name.Contains(property.Name))//uitzondering voor bull
                     {
                         bool isFinischedBefore = (bool)property.GetValue(player.FinischedNumbers);
                         property.SetValue(player.FinischedNumbers, true);
