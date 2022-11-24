@@ -4,7 +4,8 @@ namespace Pin.CricketDarts.Web.Models
 {
     public class ThrowModel
     {
-        public DartsScoreEnum Throw { get; set; }
+        public int BaseNumber { get; set; }
+        public int Throw { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 }
