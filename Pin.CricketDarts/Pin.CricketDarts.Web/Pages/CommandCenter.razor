@@ -7,30 +7,30 @@
 <input type="button" class="btn btn-primary" @onclick="RedirectToAddPlayer" value="+Add Player"/>
 <input type="button" class="btn btn-primary" @onclick="CreateCurrentMatch" value="New Match" />
 
-@if (allPosibleThrow != null) {
-<div class="d-flex justify-content-between">
-    @foreach (var item in allPosibleThrow)
-    {
-        <DartSegment DataModel="item"
-                     OnSelected="AddScore"></DartSegment>
-    }
-</div>
-<div class="d-flex justify-content-center mt-5" id="bull-container">
-    <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
-        <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
+@if (allPosibleThrow != null)
+{
+    <div class="d-flex justify-content-between">
+        @foreach (var item in allPosibleThrow)
+        {
+            <DartSegment DataModel="item"
+                         OnSelected="AddScore"></DartSegment>
+        }
     </div>
+    <div class="d-flex justify-content-center mt-5" id="bull-container">
+        <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
+            <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
+        </div>
     
-</div>
+    </div>
 
-@if(currentMatch != null)
-                {
-                    <p>
-                        <span>@currentMatch.PlayerOne.FirstName @currentMatch.PlayerOne.LastName</span> VS
-                        <span>@currentMatch.PlayerTwo.FirstName @currentMatch.PlayerTwo.LastName</span>
-                    </p>
-                }
+    @if (currentMatch != null)
+    {
 
-
+        <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                    PosibleBullThrows ="posibleBullThrows"
+                    CurrentMatch="currentMatch"
+                    ></ScoreBoard>
+    }
 }
 
 
@@ -58,7 +58,8 @@
             posibleBullThrows = bull.Select(p => new ScoreModel
             {
                 Id = p.Id,
-                Score =(int)p.Score
+                Score =(int)p.Score,
+                BaseScore = (int)p.OriginalScore,
             }).ToList();
 
             groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
@@ -83,6 +84,7 @@
             var players = ConvertToDartsPlayerModel(result.Items.ToList());
 
             currentMatch.PlayerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+            currentMatch.PlayerOne.IsActiveTurn = true;
 
             var availeblePlayersResult = await _playerService.GetApponentByPlayerId(currentMatch.PlayerOne.Id);
             if (availeblePlayersResult.IsSucces)
@@ -117,9 +119,9 @@
             {
                 Name = group.FirstOrDefault().OriginalScore.ToString()
             };
-            scorePerModel.Single = new ScoreModel { Id = group[0].Id, Score = (int)group[0].Score };
-            scorePerModel.Double = new ScoreModel { Id = group[1].Id, Score = (int)group[1].Score };
-            scorePerModel.Triple = new ScoreModel { Id = group[2].Id, Score = (int)group[2].Score };
+            scorePerModel.Single = new ScoreModel { Id = group[0].Id, Score = (int)group[0].Score,BaseScore = (int)group[0].OriginalScore };
+            scorePerModel.Double = new ScoreModel { Id = group[1].Id, Score = (int)group[1].Score,BaseScore = (int)group[1].OriginalScore };
+            scorePerModel.Triple = new ScoreModel { Id = group[2].Id, Score = (int)group[2].Score,BaseScore = (int)group[2].OriginalScore };
             allPosibleThrow.Add(scorePerModel);
 
         };
@@ -130,6 +132,15 @@
     private void AddScore(ScoreModel score)
     {
         var something = score;
+        if (currentMatch.PlayerOne.IsActiveTurn)
+        {
+            var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now};
+            currentMatch.PlayerOne.Throws.Add(newThrow);
+            var currentHits = currentMatch.PlayerOne.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
+     
+            StateHasChanged();
+        }
+
     }
 
 }
