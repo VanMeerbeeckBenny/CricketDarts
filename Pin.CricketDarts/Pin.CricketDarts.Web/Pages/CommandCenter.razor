@@ -67,6 +67,7 @@
                 Id = p.Id,
                 Score = (int)p.Score,
                 BaseScore = (int)p.OriginalScore,
+                Name = p.Score.ToString()
             }).ToList();
 
             groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
