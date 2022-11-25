@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Pin.CricketDarts.Infrastructure.Repositories
 {
-    public class ThrowRepository : GenericBaseRepository<Point>, IThrowRepository
+    public class PointRepository : GenericBaseRepository<Point>, IPointRepository
     {
-        public ThrowRepository(DbDartsContext context):base(context)
+        public PointRepository(DbDartsContext context):base(context)
         {
 
         }
@@ -29,7 +29,6 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
             return await _table
                 .OrderBy(p => p.OriginalScore)
                 .ThenBy(p => p.Score).ToListAsync();
-        }
-
+        }     
     }
 }
