@@ -66,13 +66,12 @@
 
     private MarkupString CheckThrows(DartsPlayerModel player,ScoreModel number)
     {
-        var playerOnThrow = player.Throws.OrderBy(t => t.TimeStamp).ToList();
+        var allThrowsOfPlayer = player.Throws.OrderBy(t => t.TimeStamp).ToList();
         var amountOfHits = 0;
         MarkupString result = new();
 
-        for (int i = 0; i < playerOnThrow.Count; i++)
-        {
-            var currentThrow = playerOnThrow.OrderByDescending(t => t.TimeStamp).ToList()[0];
+        for (int i = 0; i < allThrowsOfPlayer.Count; i++)
+        {            
             var allThrowOfNumber = player.Throws.Where(t => t.BaseNumber == number.BaseScore).ToList();
             int total = allThrowOfNumber.Sum(a => a.Throw);
             amountOfHits = total / number.BaseScore;
@@ -89,6 +88,8 @@
         return result;
 
     }
+
+
 
     private bool CheckPlayerEligibiletyForAddingScore(DartsPlayerModel player, ScoreModel number)
     {
