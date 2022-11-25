@@ -189,7 +189,7 @@
     {
         if (currentMatch != null)
         {
-            IsBusyWithScore = true;//2 paramters wil be refresht ceausing scoreboard component to trigger twice, this wil prevent double score adding
+            IsBusyWithScore = true;//2 parameters wil be refresht ceausing scoreboard component to trigger twice, this wil prevent double score adding
             var currentPlayer = currentMatch.PlayerOne.IsActiveTurn == true ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
 
             var createResult = await _playerThrowService.CreateAsync(currentMatch.Id, currentPlayer.Id, score.Id);
@@ -199,7 +199,7 @@
                 if (getResult.IsSucces)
                 {
                     currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel //channging currentplayer and currentScore trigger OnParametersSet
-                    {                                                                 // in scoreboard component, all score wil be update there
+                    {                                                                 // in scoreboard component, all visual score wil be update there
                         BaseNumber = (int)t.Score.OriginalScore,
                         Throw = (int)t.Score.Score,
                         TimeStamp = t.TimeStamp
