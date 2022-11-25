@@ -26,7 +26,7 @@ namespace Pin.CricketDarts.Core.Services
                 Id = Guid.NewGuid(),
                 PlayerId = playerId,
                 MatchId = matchId,
-                ThrowId = throwId,
+                ScoreId = throwId,
                 TimeStamp = DateTime.Now,
             };
 
@@ -34,6 +34,15 @@ namespace Pin.CricketDarts.Core.Services
                 return new ItemResultModel<PlayerThrow> { ErrorMessage = "Something went wrong, please try again later!" };
 
             return new ItemResultModel<PlayerThrow> { IsSucces = true };
+        }
+
+        public async Task<ItemResultModel<PlayerThrow>> GetByUserAndMatchIdAsync(Guid matchId, Guid playerId)
+        {           
+            var playerThrows = await _playerThrowRepository.GetByUserAndMatchIdAsync(matchId, playerId);
+            if(playerThrows == null || !playerThrows.Any())            
+                return new ItemResultModel<PlayerThrow> { ErrorMessage = "Nothing to show!" };
+
+            return new ItemResultModel<PlayerThrow> { IsSucces = true,Items = playerThrows };
         }
     }
 }
