@@ -31,9 +31,9 @@ namespace Pin.CricketDarts.Infrastructure.Data
                 .HasForeignKey(p => p.PlayerId);
 
             modelBuilder.Entity<PlayerThrow>()
-             .HasOne(pt => pt.Throws)
+             .HasOne(pt => pt.Score)
              .WithMany(p => p.PlayerThrows)
-             .HasForeignKey(p => p.ThrowId);
+             .HasForeignKey(p => p.ScoreId);
 
             Seeder.Seed(modelBuilder);
         }

@@ -6,8 +6,8 @@
         public Match Match { get; set; }
         public Guid PlayerId { get; set; }
         public Player Player { get; set; }
-        public Guid ThrowId { get; set; }
-        public Point Throws { get; set; }
+        public Guid ScoreId { get; set; }
+        public Point Score { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 }
