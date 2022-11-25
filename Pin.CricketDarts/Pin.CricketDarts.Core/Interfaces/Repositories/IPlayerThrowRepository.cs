@@ -9,5 +9,6 @@ namespace Pin.CricketDarts.Core.Interfaces.Repositories
 {
     public interface IPlayerThrowRepository : IBaseRepository<PlayerThrow>
     {
+        Task<IEnumerable<PlayerThrow>> GetByUserAndMatchIdAsync(Guid matchId, Guid userId);
     }
 }
