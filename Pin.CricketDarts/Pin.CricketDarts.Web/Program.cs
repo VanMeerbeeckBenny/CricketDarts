@@ -23,6 +23,8 @@ namespace Pin.CricketDarts.Web
             builder.Services.AddScoped<IPointRepository, PointRepository>();
             builder.Services.AddScoped<IPlayerThrowRepository, PlayerThrowRepository>();
             builder.Services.AddScoped<IPlayerThrowService, PlayerThrowService>();
+            builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+            builder.Services.AddScoped<IMatchService, MatchService>();
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();         
