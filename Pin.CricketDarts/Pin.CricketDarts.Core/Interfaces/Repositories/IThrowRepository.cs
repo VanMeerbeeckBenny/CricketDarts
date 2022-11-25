@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pin.CricketDarts.Core.Interfaces.Repositories
 {
-    public interface IThrowRepository
+    public interface IPointRepository
     {
         Task<Point> GetThrowByValue(int value);
         Task<IEnumerable<Point>> GetAll();
