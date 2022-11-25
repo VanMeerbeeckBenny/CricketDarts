@@ -2,10 +2,8 @@
 @inject IPlayerService _playerService
 @inject IThrowService _throwService
 @inject IPlayerThrowService _playerThrowService
+@inject IMatchService _matchService
 @inject NavigationManager navigation
-
-<input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
-<input type="button" class="btn btn-primary mb-3" @onclick="CreateCurrentMatch" value="New Match" />
 
 <Error ErrorMessage="@error"></Error>
 <LoadingScreen IsBusy="@isBussy"></LoadingScreen>
@@ -17,12 +15,12 @@
             @foreach (var item in allPosibleThrow)
             {
                 <DartSegment DataModel="item"
-                             OnSelected="AddScore"></DartSegment>
+                             OnSelected="AddScoreToDatabase"></DartSegment>
             }
         </div>
         <div class="d-flex justify-content-center mt-5" id="bull-container">
-            <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScore(posibleBullThrows[0])">
-                <div id="inner-bull" @onclick="e => AddScore(posibleBullThrows[1])" @onclick:stopPropagation></div>
+            <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScoreToDatabase(posibleBullThrows[0])">
+                <div id="inner-bull" @onclick="e => AddScoreToDatabase(posibleBullThrows[1])" @onclick:stopPropagation></div>
             </div>
 
         </div>
@@ -34,8 +32,13 @@
         <ScoreBoard AllPosibleThrow="allPosibleThrow"
                     PosibleBullThrows="posibleBullThrows"
                     CurrentMatch="currentMatch"
-                    CurrentScore="currentScore"></ScoreBoard>
+                    CurrentScore="currentScore"
+                    IsBusyGettingData="IsBusyWithScore"></ScoreBoard>
     }
+
+    <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
+    <input type="button" class="btn btn-primary mb-3" @onclick="CreateCurrentMatch" value="New Match" />
+
 }
 
 
@@ -45,7 +48,8 @@
     private List<ScoreModel> posibleBullThrows;
     private ScoreModel currentScore;
     private string error = "";
-    private bool isBussy;
+    private bool isBusyLoadingIndicator;
+    private bool IsBusyWithScore = false;
 
     private void RedirectToAddPlayer()
     {
@@ -54,7 +58,12 @@
 
     protected async override Task OnInitializedAsync()
     {
-        isBussy = true;
+        await CreateAllThrows();
+    }
+
+    private async Task CreateAllThrows()
+    {
+        isBusyLoadingIndicator = true;
         var result = await _throwService.GetAll();
         if (result.IsSucces)
         {
@@ -73,52 +82,9 @@
 
             groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
             allPosibleThrow = CreateScorePerNumberModels(groupedPoints);
-            isBussy = false;
+            isBusyLoadingIndicator = false;
 
         }
-
-    }
-
-    private async Task CreateCurrentMatch()
-    {
-
-        var result = await _playerService.GetAllPlayersAsync();
-        int maxPlayerCount;
-        Random random = new Random();
-        currentMatch = new DartsMatchModel {Id = Guid.NewGuid(), IsActiveMatch = true };
-
-        List<DartsPlayerModel> valibleCandidated = new();
-
-        if (result.IsSucces)
-        {
-            maxPlayerCount = result.Items.Count();
-            var players = ConvertToDartsPlayerModel(result.Items.ToList());
-
-            currentMatch.PlayerOne = players.ElementAt(random.Next(0, maxPlayerCount));
-            currentMatch.PlayerOne.IsActiveTurn = true;
-
-            var availeblePlayersResult = await _playerService.GetApponentByPlayerId(currentMatch.PlayerOne.Id);
-            if (availeblePlayersResult.IsSucces)
-            {
-                valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
-
-                maxPlayerCount = valibleCandidated.Count();
-                currentMatch.PlayerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
-                error = String.Empty;
-            }
-            else error = availeblePlayersResult.ErrorMessage;
-        };
-    }
-
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
-    {
-        return players.Select(p => new DartsPlayerModel
-        {
-            Id = p.Id,
-            FirstName = p.Firstname,
-            LastName = p.Lastname,
-            Throws = new List<ThrowModel>()
-        }).ToList();
     }
 
     private List<ScoresPerNumberModel> CreateScorePerNumberModels(List<List<Point>> groupedPoints)
@@ -159,31 +125,91 @@
         return allPosibleThrow;
     }
 
-    private async Task AddScore(ScoreModel score)
+    private async Task CreateCurrentMatch()
+    {
+
+        var result = await _playerService.GetAllPlayersAsync();
+        int maxPlayerCount;
+        Random random = new Random();
+        currentMatch = new DartsMatchModel();
+
+        List<DartsPlayerModel> valibleCandidated = new();
+
+        if (result.IsSucces)
+        {
+            maxPlayerCount = result.Items.Count();
+            var players = ConvertToDartsPlayerModel(result.Items.ToList());
+
+            var playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+            playerOne.IsActiveTurn = true;
+
+            var availeblePlayersResult = await _playerService.GetApponentByPlayerId(playerOne.Id);
+            if (availeblePlayersResult.IsSucces)
+            {
+                valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
+
+                maxPlayerCount = valibleCandidated.Count();
+                var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
+                var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
+                if (createMatchResult.IsSucces)
+                {
+                    currentMatch = createMatchResult.Items.Select(cm => new DartsMatchModel
+                    {
+                        PlayerOne = playerOne,
+                        PlayerTwo = playerTwo,
+                        Id = cm.Id,
+                        IsActiveMatch = cm.IsActiveGame,
+                    }).FirstOrDefault();
+                    error = String.Empty;
+
+                }
+                else error = createMatchResult.ErrorMessage;
+
+
+
+            }
+            else error = availeblePlayersResult.ErrorMessage;
+        };
+    }
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = new List<ThrowModel>()
+        }).ToList();
+    }
+
+
+
+    private async Task AddScoreToDatabase(ScoreModel score)
     {
         if (currentMatch != null)
         {
+            IsBusyWithScore = true;//2 paramters wil be refresht ceausing scoreboard component to trigger twice, this wil prevent double score adding
             var currentPlayer = currentMatch.PlayerOne.IsActiveTurn == true ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
 
-            var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now };
-            currentPlayer.Throws.Add(newThrow);
+            var createResult = await _playerThrowService.CreateAsync(currentMatch.Id, currentPlayer.Id, score.Id);
+            if (createResult.IsSucces)
+            {
+                var getResult = await _playerThrowService.GetByUserAndMatchIdAsync(currentMatch.Id, currentPlayer.Id);
+                if (getResult.IsSucces)
+                {
+                    currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel //channging currentplayer and currentScore trigger OnParametersSet
+                    {                                                                 // in scoreboard component, all score wil be update there
+                        BaseNumber = (int)t.Score.OriginalScore,
+                        Throw = (int)t.Score.Score,
+                        TimeStamp = t.TimeStamp
+                    }).ToList();
+                    currentScore = score;
+                }
 
-            //var createResult = await _playerThrowService.CreateAsync(currentMatch.Id, currentPlayer.Id, score.Id);
-            //if (createResult.IsSucces)
-            //{
-            //    var getResult = await _playerThrowService.GetByUserAndMatchIdAsync(currentMatch.Id, currentPlayer.Id);
-            //    if (getResult.IsSucces) currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel
-            //    {
-            //        BaseNumber = (int)t.Score.OriginalScore,
-            //        Throw = (int)t.Score.Score,
-            //        TimeStamp = t.TimeStamp
-            //    }).ToList();
-            //}
+                IsBusyWithScore = false;
 
-            var currentHits = currentPlayer.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
-            currentScore = score;
-            StateHasChanged();
-
+            }
         }
         else error = "Please create a match!";
 
