@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pin.CricketDarts.Core.Entities;
+using Pin.CricketDarts.Core.Interfaces.Repositories;
 using Pin.CricketDarts.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Pin.CricketDarts.Infrastructure.Repositories
 {
-    public  class PlayerThrowRepository : GenericBaseRepository<PlayerThrow>
+    public  class PlayerThrowRepository : GenericBaseRepository<PlayerThrow>,IPlayerThrowRepository
     {
 
         public PlayerThrowRepository(DbDartsContext context) : base(context)
@@ -25,13 +26,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
                                                      .ToListAsync();           
 
             
-        }
-
-        public IQueryable<PlayerThrow> GetAsQueryable()
-        {
-            return _table.OrderByDescending(pt => pt.TimeStamp)
-                          .AsQueryable();
-        }
+        }   
      
     }
 }
