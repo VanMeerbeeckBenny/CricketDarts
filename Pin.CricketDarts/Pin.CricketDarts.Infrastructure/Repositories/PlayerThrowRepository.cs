@@ -17,15 +17,21 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
 
         }
 
-        public async Task<IEnumerable<Throw>> GetByUserAndMatchIdAsync(Guid matchId, Guid userId)
-        {
-            List<Throw> throws = new List<Throw>();
-            var playerThrows = await _table.Where(pt => pt.PlayerId == userId &&
+        public async Task<IEnumerable<PlayerThrow>> GetByUserAndMatchIdAsync(Guid matchId, Guid userId)
+        {            
+            return await _table.Where(pt => pt.PlayerId == userId &&
                                                         pt.MatchId == matchId)
                                                      .OrderByDescending(pt => pt.TimeStamp)
                                                      .ToListAsync();           
 
-            return throws;
+            
         }
+
+        public IQueryable<PlayerThrow> GetAsQueryable()
+        {
+            return _table.OrderByDescending(pt => pt.TimeStamp)
+                          .AsQueryable();
+        }
+     
     }
 }
