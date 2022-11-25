@@ -24,8 +24,7 @@ namespace Pin.CricketDarts.Core.Services
         {
 
             Player playerToAdd = new Player
-            {
-                Id = Guid.NewGuid(),
+            {                
                 Firstname = firstname,
                 Lastname = lastname
             };
