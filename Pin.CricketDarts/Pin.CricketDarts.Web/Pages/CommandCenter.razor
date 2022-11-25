@@ -25,7 +25,14 @@
 
         </div>
     </div>
-
+    if (!string.IsNullOrWhiteSpace(gameIsDoneMessage))
+    {
+        <div class="mt-2">
+            <div class="error-message  alert-success w-50 m-auto">
+                <p class="text-success p-2 text-center">@gameIsDoneMessage</p>
+            </div>
+        </div>
+    }
     @if (currentMatch != null && string.IsNullOrWhiteSpace(error))
     {
 
@@ -33,7 +40,8 @@
                     PosibleBullThrows="posibleBullThrows"
                     CurrentMatch="currentMatch"
                     CurrentScore="currentScore"
-                    IsBusyGettingData="IsBusyWithScore"></ScoreBoard>
+                    IsBusyGettingData="IsBusyWithScore"
+                    GameIsDone="CloseGame"></ScoreBoard>
     }
 
     <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
@@ -50,6 +58,8 @@
     private string error = "";
     private bool isBusyLoadingIndicator;
     private bool IsBusyWithScore = false;
+    private string gameIsDoneMessage;
+
 
     private void RedirectToAddPlayer()
     {
@@ -161,6 +171,7 @@
                         IsActiveMatch = cm.IsActiveGame,
                     }).FirstOrDefault();
                     error = String.Empty;
+                    gameIsDoneMessage = string.Empty;
 
                 }
                 else error = createMatchResult.ErrorMessage;
@@ -182,8 +193,6 @@
             Throws = new List<ThrowModel>()
         }).ToList();
     }
-
-
 
     private async Task AddScoreToDatabase(ScoreModel score)
     {
@@ -213,6 +222,17 @@
         }
         else error = "Please create a match!";
 
+    }
+
+    private async Task CloseGame(bool gameIsDone)
+    {
+        var winner = currentMatch.PlayerOne.Score > currentMatch.PlayerTwo.Score ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+        var loser = currentMatch.PlayerOne.Score < currentMatch.PlayerTwo.Score ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+        if (gameIsDone)
+        {
+            gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!";
+            currentMatch = null;
+        }
     }
 
 
