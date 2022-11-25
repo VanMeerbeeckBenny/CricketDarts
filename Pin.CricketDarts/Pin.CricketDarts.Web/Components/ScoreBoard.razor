@@ -48,6 +48,8 @@
     public ScoreModel CurrentScore { get; set; }
     [Parameter]
     public bool IsBusyGettingData { get; set; }
+    [Parameter]
+    public EventCallback<bool> GameIsDone { get; set; }
     private DartsPlayerModel currentPlayer;
 
 
@@ -142,11 +144,36 @@
                             if (isFinischedBefore) player.Score += CurrentScore.Score;
                             else player.Score += total - CurrentScore.BaseScore * 3;
                         }
+                        var gameIsDone = CheckGameIsDone(player);
+                        if (gameIsDone) GameIsDone.InvokeAsync(gameIsDone);
                         break;
                     }
                 }
             }
         }
+    }
+
+    private bool CheckGameIsDone(DartsPlayerModel player)
+    {
+
+        DartsPlayerModel opponent = CurrentMatch.PlayerOne == player ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
+        if (CheckPlayerIsDone(player) && CheckPlayerIsDone(opponent)) return true;
+        return false;
+    }
+
+    private bool CheckPlayerIsDone(DartsPlayerModel player)
+    {
+        bool IsDone = true;
+        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+        {
+            IsDone = (bool)property.GetValue(player.FinischedNumbers);
+            if (!IsDone)
+            {
+                break;
+            }
+        }
+
+        return IsDone;
     }
 
 
