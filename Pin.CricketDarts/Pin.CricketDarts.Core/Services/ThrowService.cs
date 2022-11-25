@@ -12,9 +12,9 @@ namespace Pin.CricketDarts.Core.Services
 {
     public class ThrowService:IThrowService
     {
-        private readonly IThrowRepository _throwRepository;
+        private readonly IPointRepository _throwRepository;
 
-        public ThrowService(IThrowRepository throwRepository)
+        public ThrowService(IPointRepository throwRepository)
         {
             _throwRepository = throwRepository;
         }
