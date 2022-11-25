@@ -1,6 +1,7 @@
 ﻿@page "/CommandCenter"
 @inject IPlayerService _playerService
 @inject IThrowService _throwService
+@inject IPlayerThrowService _playerThrowService
 @inject NavigationManager navigation
 
 <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
@@ -27,7 +28,7 @@
         </div>
     </div>
 
-    @if (currentMatch != null)
+    @if (currentMatch != null && string.IsNullOrWhiteSpace(error))
     {
 
         <ScoreBoard AllPosibleThrow="allPosibleThrow"
@@ -80,11 +81,11 @@
 
     private async Task CreateCurrentMatch()
     {
-        error = String.Empty;
+
         var result = await _playerService.GetAllPlayersAsync();
         int maxPlayerCount;
         Random random = new Random();
-        currentMatch = new DartsMatchModel { IsActiveMatch = true };
+        currentMatch = new DartsMatchModel {Id = Guid.NewGuid(), IsActiveMatch = true };
 
         List<DartsPlayerModel> valibleCandidated = new();
 
@@ -103,6 +104,7 @@
 
                 maxPlayerCount = valibleCandidated.Count();
                 currentMatch.PlayerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
+                error = String.Empty;
             }
             else error = availeblePlayersResult.ErrorMessage;
         };
@@ -157,13 +159,27 @@
         return allPosibleThrow;
     }
 
-    private void AddScore(ScoreModel score)
+    private async Task AddScore(ScoreModel score)
     {
         if (currentMatch != null)
         {
             var currentPlayer = currentMatch.PlayerOne.IsActiveTurn == true ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+
             var newThrow = new ThrowModel { BaseNumber = score.BaseScore, Throw = score.Score, TimeStamp = DateTime.Now };
             currentPlayer.Throws.Add(newThrow);
+
+            //var createResult = await _playerThrowService.CreateAsync(currentMatch.Id, currentPlayer.Id, score.Id);
+            //if (createResult.IsSucces)
+            //{
+            //    var getResult = await _playerThrowService.GetByUserAndMatchIdAsync(currentMatch.Id, currentPlayer.Id);
+            //    if (getResult.IsSucces) currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel
+            //    {
+            //        BaseNumber = (int)t.Score.OriginalScore,
+            //        Throw = (int)t.Score.Score,
+            //        TimeStamp = t.TimeStamp
+            //    }).ToList();
+            //}
+
             var currentHits = currentPlayer.Throws.Where(t => t.BaseNumber == score.BaseScore).Count();
             currentScore = score;
             StateHasChanged();
