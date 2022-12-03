@@ -44,21 +44,11 @@
     public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
     [Parameter]
     public List<ScoreModel> PosibleBullThrows { get; set; }
-    [Parameter]
-    public ScoreModel CurrentScore { get; set; }
-    [Parameter]
-    public bool IsBusyGettingData { get; set; }
-    [Parameter]
-    public EventCallback<bool> GameIsDone { get; set; }
-    private DartsPlayerModel currentPlayer;
 
-
-
+   
     protected override void OnParametersSet()
     {
-        base.OnParametersSet();
-        currentPlayer = CurrentMatch.PlayerOne.IsActiveTurn ? CurrentMatch.PlayerOne : CurrentMatch.PlayerTwo;
-        if(!IsBusyGettingData)AddScore(currentPlayer);
+        base.OnParametersSet();             
 
     }
     private void SetActivePlayer(DartsPlayerModel playerToBeActive)
@@ -95,86 +85,7 @@
     }
 
 
-    private bool CheckPlayerEligibiletyForAddingScore(DartsPlayerModel player, ScoreModel number)
-    {
-
-        DartsPlayerModel opponent = CurrentMatch.PlayerOne == player ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
-        bool shouldGetScore = false;
-
-        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
-        {
-            if (property.Name == number.Name || number.Name.Contains(property.Name)) //uitzondering voor bull
-            {
-                foreach (var opponentProperty in opponent.FinischedNumbers.GetType().GetProperties())
-                {
-                    if (property.Name == opponentProperty.Name &&
-                        (bool)property.GetValue(player.FinischedNumbers) == true && (bool)opponentProperty.GetValue(opponent.FinischedNumbers) == false)
-                    {
-                        shouldGetScore = true;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-
-        return shouldGetScore;
-    }
-
-    private void AddScore(DartsPlayerModel player)
-    {
-        if (player.Throws.Any())
-        {
-            var allThrowOfNumber = player.Throws.Where(t => t.BaseNumber == CurrentScore.BaseScore).ToList();
-            int total = allThrowOfNumber.Sum(a => a.Throw);
-            int amountOfHits = total / CurrentScore.BaseScore;
-
-            if (amountOfHits >= 3)
-            {
-                foreach (var property in player.FinischedNumbers.GetType().GetProperties())
-                {
-
-                    if (property.Name == CurrentScore.Name || CurrentScore.Name.Contains(property.Name))//uitzondering voor bull
-                    {
-                        bool isFinischedBefore = (bool)property.GetValue(player.FinischedNumbers);
-                        property.SetValue(player.FinischedNumbers, true);
-                        bool shouldGetScore = CheckPlayerEligibiletyForAddingScore(player, CurrentScore);
-                        if (shouldGetScore)
-                        {
-                            if (isFinischedBefore) player.Score += CurrentScore.Score;
-                            else player.Score += total - CurrentScore.BaseScore * 3;
-                        }
-                        var gameIsDone = CheckGameIsDone(player);
-                        if (gameIsDone) GameIsDone.InvokeAsync(gameIsDone);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    private bool CheckGameIsDone(DartsPlayerModel player)
-    {
-
-        DartsPlayerModel opponent = CurrentMatch.PlayerOne == player ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
-        if (CheckPlayerIsDone(player) && CheckPlayerIsDone(opponent)) return true;
-        return false;
-    }
-
-    private bool CheckPlayerIsDone(DartsPlayerModel player)
-    {
-        bool IsDone = true;
-        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
-        {
-            IsDone = (bool)property.GetValue(player.FinischedNumbers);
-            if (!IsDone)
-            {
-                break;
-            }
-        }
-
-        return IsDone;
-    }
+    
 
 
 }

@@ -15,12 +15,12 @@
             @foreach (var item in allPosibleThrow)
             {
                 <DartSegment DataModel="item"
-                             OnSelected="AddScoreToDatabase"></DartSegment>
+                             OnSelected="ProcessThrow"></DartSegment>
             }
         </div>
         <div class="d-flex justify-content-center mt-5" id="bull-container">
-            <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => AddScoreToDatabase(posibleBullThrows[0])">
-                <div id="inner-bull" @onclick="e => AddScoreToDatabase(posibleBullThrows[1])" @onclick:stopPropagation></div>
+            <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => ProcessThrow(posibleBullThrows[0])">
+                <div id="inner-bull" @onclick="e => ProcessThrow(posibleBullThrows[1])" @onclick:stopPropagation></div>
             </div>
 
         </div>
@@ -38,10 +38,8 @@
 
         <ScoreBoard AllPosibleThrow="allPosibleThrow"
                     PosibleBullThrows="posibleBullThrows"
-                    CurrentMatch="currentMatch"
-                    CurrentScore="currentScore"
-                    IsBusyGettingData="IsBusyWithScore"
-                    GameIsDone="CloseGame"></ScoreBoard>
+                    CurrentMatch="currentMatch"></ScoreBoard>
+
     }
 
     <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
@@ -54,10 +52,8 @@
     private DartsMatchModel currentMatch;
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
-    private ScoreModel currentScore;
     private string error = "";
     private bool isBusyLoadingIndicator;
-    private bool IsBusyWithScore = false;
     private string gameIsDoneMessage;
 
 
@@ -103,32 +99,32 @@
 
         foreach (var group in groupedPoints)
         {
-            var scorePerModel = new ScoresPerNumberModel
+            var scorePerNumber = new ScoresPerNumberModel
             {
                 Name = group.FirstOrDefault().OriginalScore.ToString()
             };
-            scorePerModel.Single = new ScoreModel
+            scorePerNumber.Single = new ScoreModel
             {
                 Id = group[0].Id,
                 Score = (int)group[0].Score,
                 BaseScore = (int)group[0].OriginalScore,
                 Name = group[0].OriginalScore.ToString()
             };
-            scorePerModel.Double = new ScoreModel
+            scorePerNumber.Double = new ScoreModel
             {
                 Id = group[1].Id,
                 Score = (int)group[1].Score,
                 BaseScore = (int)group[1].OriginalScore,
                 Name = group[1].OriginalScore.ToString()
             };
-            scorePerModel.Triple = new ScoreModel
+            scorePerNumber.Triple = new ScoreModel
             {
                 Id = group[2].Id,
                 Score = (int)group[2].Score,
                 BaseScore = (int)group[2].OriginalScore,
                 Name = group[2].OriginalScore.ToString()
             };
-            allPosibleThrow.Add(scorePerModel);
+            allPosibleThrow.Add(scorePerNumber);
 
         };
 
@@ -194,11 +190,11 @@
         }).ToList();
     }
 
-    private async Task AddScoreToDatabase(ScoreModel score)
+    private async Task ProcessThrow(ScoreModel score)
     {
         if (currentMatch != null)
         {
-            IsBusyWithScore = true;//2 parameters wil be refresht ceausing scoreboard component to trigger twice, this wil prevent double score adding
+
             var currentPlayer = currentMatch.PlayerOne.IsActiveTurn == true ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
 
             var createResult = await _playerThrowService.CreateAsync(currentMatch.Id, currentPlayer.Id, score.Id);
@@ -207,21 +203,76 @@
                 var getResult = await _playerThrowService.GetByUserAndMatchIdAsync(currentMatch.Id, currentPlayer.Id);
                 if (getResult.IsSucces)
                 {
-                    currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel //channging currentplayer and currentScore trigger OnParametersSet
-                    {                                                                 // in scoreboard component, all visual score wil be update there
+                    currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel
+                    {
                         BaseNumber = (int)t.Score.OriginalScore,
                         Throw = (int)t.Score.Score,
                         TimeStamp = t.TimeStamp
                     }).ToList();
-                    currentScore = score;
                 }
-
-                IsBusyWithScore = false;
-
+                await AddScore(currentPlayer,score);
             }
         }
         else error = "Please create a match!";
 
+    }
+
+    private bool CheckPlayerEligibiletyForAddingScore(DartsPlayerModel player, ScoreModel number)
+    {
+
+        DartsPlayerModel opponent = currentMatch.PlayerOne == player ? currentMatch.PlayerTwo : currentMatch.PlayerOne;
+        bool shouldGetScore = false;
+
+        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+        {
+            if (property.Name == number.Name || number.Name.Contains(property.Name)) //uitzondering voor bull
+            {
+                foreach (var opponentProperty in opponent.FinischedNumbers.GetType().GetProperties())
+                {
+                    if (property.Name == opponentProperty.Name &&
+                        (bool)property.GetValue(player.FinischedNumbers) == true && (bool)opponentProperty.GetValue(opponent.FinischedNumbers) == false)
+                    {
+                        shouldGetScore = true;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        return shouldGetScore;
+    }
+
+    private async Task AddScore(DartsPlayerModel player, ScoreModel score)
+    {
+        if (player.Throws.Any())
+        {
+            var allThrowOfNumber = player.Throws.Where(t => t.BaseNumber == score.BaseScore).ToList();
+            int total = allThrowOfNumber.Sum(a => a.Throw);
+            int amountOfHits = total / score.BaseScore;
+
+            if (amountOfHits >= 3)
+            {
+                foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+                {
+
+                    if (property.Name == score.Name || score.Name.Contains(property.Name))//uitzondering voor bull
+                    {
+                        bool isFinischedBefore = (bool)property.GetValue(player.FinischedNumbers);
+                        property.SetValue(player.FinischedNumbers, true);
+                        bool shouldGetScore = CheckPlayerEligibiletyForAddingScore(player, score);
+                        if (shouldGetScore)
+                        {
+                            if (isFinischedBefore) player.Score += score.Score;
+                            else player.Score += total - score.BaseScore * 3;
+                        }
+                        var gameIsDone = CheckGameIsDone(player);
+                        if (gameIsDone) await CloseGame(gameIsDone);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private async Task CloseGame(bool gameIsDone)
@@ -231,8 +282,34 @@
         if (gameIsDone)
         {
             gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!";
-            currentMatch = null;
+
+            var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
+            if (result.IsSucces) currentMatch = null;
+            else error = result.ErrorMessage;
         }
+    }
+
+    private bool CheckGameIsDone(DartsPlayerModel player)
+    {
+
+        DartsPlayerModel opponent = currentMatch.PlayerOne == player ? currentMatch.PlayerTwo : currentMatch.PlayerOne;
+        if (CheckPlayerIsDone(player) && CheckPlayerIsDone(opponent)) return true;
+        return false;
+    }
+
+    private bool CheckPlayerIsDone(DartsPlayerModel player)
+    {
+        bool IsDone = true;
+        foreach (var property in player.FinischedNumbers.GetType().GetProperties())
+        {
+            IsDone = (bool)property.GetValue(player.FinischedNumbers);
+            if (!IsDone)
+            {
+                break;
+            }
+        }
+
+        return IsDone;
     }
 
 
