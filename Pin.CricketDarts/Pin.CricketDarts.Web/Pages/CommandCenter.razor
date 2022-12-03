@@ -207,6 +207,7 @@
                         {
                             if (isFinischedBefore) player.Score += score.Score;
                             else player.Score += total - score.BaseScore * 3;
+                            await _matchService.UpdateAsync(currentMatch.Id,true,currentMatch.PlayerOne.Score,currentMatch.PlayerTwo.Score);
                         }
                         var gameIsDone = CheckGameIsDone(player);
                         if (gameIsDone) await CloseGame(gameIsDone);
