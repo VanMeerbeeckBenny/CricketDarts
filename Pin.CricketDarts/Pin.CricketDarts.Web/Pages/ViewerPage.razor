@@ -1,0 +1,36 @@
+﻿@page "/ViewerPage";
+@inject IMatchService _matchService
+@inject IPlayerService _playerService
+<h3>ViewerPage</h3>
+
+<ScoreBoard ></ScoreBoard>
+@code {
+    private DartsMatchModel currentMatch;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var resultActiveMatch = await _matchService.GetActiveMatch();
+        if (resultActiveMatch.IsSucces)
+        {
+            var match = resultActiveMatch.Items.FirstOrDefault();
+            var players = ConvertToDartsPlayerModel(match.Players);
+
+            currentMatch.Id = match.Id;
+            currentMatch.IsActiveMatch = match.IsActiveGame;
+
+            currentMatch.PlayerOne = players[0];
+            currentMatch.PlayerOne = players[1];            
+        }
+    }
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = new List<ThrowModel>()
+        }).ToList();
+    }
+}
