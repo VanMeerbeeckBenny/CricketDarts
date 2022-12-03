@@ -3,17 +3,23 @@
 @inject IPlayerService _playerService
 @inject IPosibleThrowService _posibleThrowService
 <h3>ViewerPage</h3>
+<div class="d-flex justify-content-between">
+    @if (currentMatches != null && currentMatches.Any())
+    {
+        foreach (var match in currentMatches)
+        {
+            <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                        PosibleBullThrows="posibleBullThrows"
+                        CurrentMatch="match"
+                        ShowButtons="false"></ScoreBoard>
+        }
 
-@if (currentMatch != null)
-{
-<ScoreBoard AllPosibleThrow="allPosibleThrow"
-            PosibleBullThrows="posibleBullThrows"
-            CurrentMatch="currentMatch"></ScoreBoard>
-}
+    }
+</div>
 @code {
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
-    private DartsMatchModel currentMatch;
+    private List<DartsMatchModel> currentMatches = new();
 
 
     protected async override Task OnInitializedAsync()
@@ -21,17 +27,18 @@
 
         allPosibleThrow = await _posibleThrowService.CreateAllThrows();
         posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
-        await GetMatch();
+        await GetAllActiveMatch();
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players,Guid matchId)
     {
         return players.Select(p => new DartsPlayerModel
         {
             Id = p.Id,
             FirstName = p.Firstname,
             LastName = p.Lastname,
-            Throws = p.AllThrows.Select(at => new ThrowModel
+            Throws = p.AllThrows.Where(at => at.MatchId == matchId)
+                .Select(at => new ThrowModel
             {
                 BaseNumber = (int)at.Score.OriginalScore,
                 Throw = (int)at.Score.Score,
@@ -40,22 +47,28 @@
             }).ToList(),
         }).ToList();
     }
-    private async Task GetMatch()
+    private async Task GetAllActiveMatch()
     {
-        var resultActiveMatch = await _matchService.GetActiveMatch();
+        var resultActiveMatch = await _matchService.GetActiveMatches();
+        DartsMatchModel currentMatch = new();
         if (resultActiveMatch.IsSucces)
         {
-            var match = resultActiveMatch.Items.FirstOrDefault();
-            var players = ConvertToDartsPlayerModel(match.Players);
-            players[0].Score = match.PlayerOneScore;
-            players[1].Score = match.PlayerTwoScore;
-            currentMatch = new DartsMatchModel
+            var matches = resultActiveMatch.Items.ToList();
+            foreach (var match in matches)
             {
-                Id = match.Id,
-                IsActiveMatch = match.IsActiveGame,
-                PlayerOne = players[0],
-                PlayerTwo = players[1],
-            };
+                var players = ConvertToDartsPlayerModel(match.Players,match.Id);
+                players[0].Score = match.PlayerOneScore;
+                players[1].Score = match.PlayerTwoScore;
+                currentMatch = new DartsMatchModel
+                {
+                    Id = match.Id,
+                    IsActiveMatch = match.IsActiveGame,
+                    PlayerOne = players[0],
+                    PlayerTwo = players[1],
+                };
+                currentMatches.Add(currentMatch);
+            }
+
 
         }
     }
