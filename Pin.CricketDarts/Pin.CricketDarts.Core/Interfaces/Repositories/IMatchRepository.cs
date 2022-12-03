@@ -10,5 +10,6 @@ namespace Pin.CricketDarts.Core.Interfaces.Repositories
     public interface IMatchRepository :IBaseRepository<Match>
     {
         Task<IEnumerable<Match>> GetByUserIdAsync(Guid userId);
+        Task<Match> GetActiveMatch();
     }
 }
