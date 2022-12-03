@@ -59,12 +59,12 @@ namespace Pin.CricketDarts.Core.Services
             return new ItemResultModel<Match> { IsSucces = true };
         }
 
-        public async Task<ItemResultModel<Match>> GetActiveMatch()
+        public async Task<ItemResultModel<Match>> GetActiveMatches()
         {
-            var result =await _matchRepository.GetActiveMatch();
+            var result =await _matchRepository.GetActiveMatches();
             if (result == null) return new ItemResultModel<Match> { ErrorMessage = "No active match!" };
 
-            return new ItemResultModel<Match> { IsSucces = true, Items = new List<Match> { result } };
+            return new ItemResultModel<Match> { IsSucces = true, Items = result  };
         }
     }
 }

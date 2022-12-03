@@ -37,12 +37,13 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
                                .ToListAsync();
         }
 
-        public async Task<Match> GetActiveMatch()
+        public async Task<List<Match>> GetActiveMatches()
         {
             return await _table.Include(m => m.Players)
                          .ThenInclude(p => p.AllThrows)
                          .OrderByDescending(m => m.TimeStamp)
-                         .FirstOrDefaultAsync(m => m.IsActiveGame == true);
+                         .Where(m => m.IsActiveGame == true)
+                         .ToListAsync();
         }
     }
 }
