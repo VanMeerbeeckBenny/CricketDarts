@@ -36,5 +36,12 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
                                .Where(m => m.Players.Select(p => p.Id).Contains(userId))
                                .ToListAsync();
         }
+
+        public async Task<Match> GetActiveMatch()
+        {
+            return await _table.Include(m => m.Players)
+                         .OrderByDescending(m => m.TimeStamp)
+                         .FirstOrDefaultAsync(m => m.IsActiveGame == true);
+        }
     }
 }

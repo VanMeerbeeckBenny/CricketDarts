@@ -58,5 +58,13 @@ namespace Pin.CricketDarts.Core.Services
             if (!isSucces) return new ItemResultModel<Match> { ErrorMessage = "Something went wrong, please try again later!" };
             return new ItemResultModel<Match> { IsSucces = true };
         }
+
+        public async Task<ItemResultModel<Match>> GetActiveMatch()
+        {
+            var result =await _matchRepository.GetActiveMatch();
+            if (result == null) return new ItemResultModel<Match> { ErrorMessage = "No active match!" };
+
+            return new ItemResultModel<Match> { IsSucces = true, Items = new List<Match> { result } };
+        }
     }
 }
