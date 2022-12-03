@@ -3,12 +3,18 @@
         <div class="d-flex flex-row w-100">
             <div class="playerOneSucces w-50 my-border-bottom">
                 <span>@CurrentMatch.PlayerOne.FirstName @CurrentMatch.PlayerOne.LastName</span>
-                <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)"/>
-            </div>
+                @if (ShowButtons)
+                {
+                    <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)" />
+                }
+                </div>
             <div class="number-empty my-border-bottom"></div>
             <div class="playerTwoSucces w-50 ps-2 my-border-bottom">
                 <span>@CurrentMatch.PlayerTwo.FirstName @CurrentMatch.PlayerTwo.LastName</span>
-                <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerTwo)" />
+                @if (ShowButtons)
+                {
+                    <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerTwo)" />
+                }
             </div>
         </div>
         @if (CurrentMatch != null)
@@ -44,11 +50,13 @@
     public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
     [Parameter]
     public List<ScoreModel> PosibleBullThrows { get; set; }
+    [Parameter]
+    public bool ShowButtons { get; set; } = true;
 
-   
+
     protected override void OnParametersSet()
     {
-        base.OnParametersSet();             
+        base.OnParametersSet();
 
     }
     private void SetActivePlayer(DartsPlayerModel playerToBeActive)
@@ -85,7 +93,7 @@
     }
 
 
-    
+
 
 
 }
