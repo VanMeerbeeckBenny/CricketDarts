@@ -40,6 +40,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         public async Task<Match> GetActiveMatch()
         {
             return await _table.Include(m => m.Players)
+                         .ThenInclude(p => p.AllThrows)
                          .OrderByDescending(m => m.TimeStamp)
                          .FirstOrDefaultAsync(m => m.IsActiveGame == true);
         }
