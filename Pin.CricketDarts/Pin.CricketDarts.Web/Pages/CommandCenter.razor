@@ -3,6 +3,7 @@
 @inject IThrowService _throwService
 @inject IPlayerThrowService _playerThrowService
 @inject IMatchService _matchService
+@inject IPosibleThrowService _posibleThrowService
 @inject NavigationManager navigation
 
 <Error ErrorMessage="@error"></Error>
@@ -64,72 +65,13 @@
 
     protected async override Task OnInitializedAsync()
     {
-        await CreateAllThrows();
-    }
-
-    private async Task CreateAllThrows()
-    {
         isBusyLoadingIndicator = true;
-        var result = await _throwService.GetAll();
-        if (result.IsSucces)
-        {
-            var groupedPoints = result.Items.GroupBy(p => p.OriginalScore)
-                        .Select(group => group.ToList())
-                        .ToList();
+        allPosibleThrow = await _posibleThrowService.CreateAllThrows();
+        posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
+        if (allPosibleThrow == null || posibleBullThrows == null) error = "Something went wrong please restart!";
+        isBusyLoadingIndicator = false;
 
-            var bull = groupedPoints[groupedPoints.Count - 1];
-            posibleBullThrows = bull.Select(p => new ScoreModel
-            {
-                Id = p.Id,
-                Score = (int)p.Score,
-                BaseScore = (int)p.OriginalScore,
-                Name = p.Score.ToString()
-            }).ToList();
-
-            groupedPoints.RemoveAt(groupedPoints.Count - 1);// remove bull as it is drawn difrent
-            allPosibleThrow = CreateScorePerNumberModels(groupedPoints);
-            isBusyLoadingIndicator = false;
-
-        }
-    }
-
-    private List<ScoresPerNumberModel> CreateScorePerNumberModels(List<List<Point>> groupedPoints)
-    {
-        List<ScoresPerNumberModel> allPosibleThrow = new();
-
-        foreach (var group in groupedPoints)
-        {
-            var scorePerNumber = new ScoresPerNumberModel
-            {
-                Name = group.FirstOrDefault().OriginalScore.ToString()
-            };
-            scorePerNumber.Single = new ScoreModel
-            {
-                Id = group[0].Id,
-                Score = (int)group[0].Score,
-                BaseScore = (int)group[0].OriginalScore,
-                Name = group[0].OriginalScore.ToString()
-            };
-            scorePerNumber.Double = new ScoreModel
-            {
-                Id = group[1].Id,
-                Score = (int)group[1].Score,
-                BaseScore = (int)group[1].OriginalScore,
-                Name = group[1].OriginalScore.ToString()
-            };
-            scorePerNumber.Triple = new ScoreModel
-            {
-                Id = group[2].Id,
-                Score = (int)group[2].Score,
-                BaseScore = (int)group[2].OriginalScore,
-                Name = group[2].OriginalScore.ToString()
-            };
-            allPosibleThrow.Add(scorePerNumber);
-
-        };
-
-        return allPosibleThrow;
-    }
+    }  
 
     private async Task CreateCurrentMatch()
     {
