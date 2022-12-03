@@ -11,6 +11,7 @@ namespace Pin.CricketDarts.Core.Interfaces.Services
     public interface IMatchService
     {
         Task<ItemResultModel<Match>>CreateAsync(Guid playeroneId, Guid playerTwoId);
+        Task<ItemResultModel<Match>> UpdateAsync(Guid id,bool isActive,int playerOneScore,int PlayerTwoScore);
 
     }
 }
