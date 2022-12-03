@@ -1,26 +1,27 @@
 ﻿@page "/ViewerPage";
 @inject IMatchService _matchService
 @inject IPlayerService _playerService
+@inject IPosibleThrowService _posibleThrowService
 <h3>ViewerPage</h3>
 
-<ScoreBoard ></ScoreBoard>
+@if (currentMatch != null)
+{
+<ScoreBoard AllPosibleThrow="allPosibleThrow"
+            PosibleBullThrows="posibleBullThrows"
+            CurrentMatch="currentMatch"></ScoreBoard>
+}
 @code {
+    private List<ScoresPerNumberModel> allPosibleThrow;
+    private List<ScoreModel> posibleBullThrows;
     private DartsMatchModel currentMatch;
+
 
     protected async override Task OnInitializedAsync()
     {
-        var resultActiveMatch = await _matchService.GetActiveMatch();
-        if (resultActiveMatch.IsSucces)
-        {
-            var match = resultActiveMatch.Items.FirstOrDefault();
-            var players = ConvertToDartsPlayerModel(match.Players);
 
-            currentMatch.Id = match.Id;
-            currentMatch.IsActiveMatch = match.IsActiveGame;
-
-            currentMatch.PlayerOne = players[0];
-            currentMatch.PlayerOne = players[1];            
-        }
+        allPosibleThrow = await _posibleThrowService.CreateAllThrows();
+        posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
+        await GetMatch();
     }
 
     private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
@@ -30,7 +31,32 @@
             Id = p.Id,
             FirstName = p.Firstname,
             LastName = p.Lastname,
-            Throws = new List<ThrowModel>()
+            Throws = p.AllThrows.Select(at => new ThrowModel
+            {
+                BaseNumber = (int)at.Score.OriginalScore,
+                Throw = (int)at.Score.Score,
+                TimeStamp = at.TimeStamp
+
+            }).ToList(),
         }).ToList();
+    }
+    private async Task GetMatch()
+    {
+        var resultActiveMatch = await _matchService.GetActiveMatch();
+        if (resultActiveMatch.IsSucces)
+        {
+            var match = resultActiveMatch.Items.FirstOrDefault();
+            var players = ConvertToDartsPlayerModel(match.Players);
+            players[0].Score = match.PlayerOneScore;
+            players[1].Score = match.PlayerTwoScore;
+            currentMatch = new DartsMatchModel
+            {
+                Id = match.Id,
+                IsActiveMatch = match.IsActiveGame,
+                PlayerOne = players[0],
+                PlayerTwo = players[1],
+            };
+
+        }
     }
 }
