@@ -6,6 +6,8 @@ using Pin.CricketDarts.Core.Interfaces.Services;
 using Pin.CricketDarts.Core.Services;
 using Pin.CricketDarts.Infrastructure.Data;
 using Pin.CricketDarts.Infrastructure.Repositories;
+using Pin.CricketDarts.Web.Interfaces;
+using Pin.CricketDarts.Web.Services;
 
 namespace Pin.CricketDarts.Web
 {
@@ -25,6 +27,7 @@ namespace Pin.CricketDarts.Web
             builder.Services.AddScoped<IPlayerThrowService, PlayerThrowService>();
             builder.Services.AddScoped<IMatchRepository, MatchRepository>();
             builder.Services.AddScoped<IMatchService, MatchService>();
+            builder.Services.AddScoped<IPosibleThrowService, PosibleThrowService>();
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();         
