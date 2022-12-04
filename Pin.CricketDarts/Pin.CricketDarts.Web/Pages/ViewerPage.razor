@@ -5,36 +5,60 @@
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
-<h3>ViewerPage</h3>
-
-<div class="d-flex justify-content-between flex-wrap">
+<div class="d-flex">
     @if (currentMatches != null && currentMatches.Any())
     {
-        foreach (var match in currentMatches)
+        <div class="d-flex flex-wrap">
+
+            @foreach (var match in currentMatches)
+            {
+                <div class="mb-3">
+                    <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                                PosibleBullThrows="posibleBullThrows"
+                                CurrentMatch="match"
+                                ShowButtons="false"></ScoreBoard>
+                </div>
+            }
+
+            
+        </div>
+        if (allPlayers != null && allPlayers.Any())
         {
-            <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                        PosibleBullThrows="posibleBullThrows"
-                        CurrentMatch="match"
-                        ShowButtons="false"></ScoreBoard>
-
+        <div class="w-50">
+            <div class="mb-4">
+                <TopStats newThrow="newThrow"
+                          Devider="2"
+                          allPlayers="allPlayers"
+                          Title="Top Double"></TopStats>
+            </div>
+            <div>
+                <TopStats newThrow="newThrow"
+                          Devider="3"
+                          allPlayers="allPlayers"
+                          Title="Top Triple"></TopStats>
+            </div>
+        </div>
         }
-
     }
-</div>
+    </div>
 @code {
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
     private List<DartsMatchModel> currentMatches = new();
     private List<DartsMatchModel> allMatches = new();
     private HubConnection hubConnection;
+    private SignalRThrowModel newThrow;
+    private List<DartsPlayerModel> allPlayers;
 
     protected async override Task OnInitializedAsync()
     {
 
         allPosibleThrow = await _posibleThrowService.CreateAllThrows();
         posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
+        allPlayers = await GetAllPlayers();
         await GetAllActiveMatch();
         await GetAllMatches();
+
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/Cricket-darts"))
         .Build();
@@ -55,7 +79,9 @@
                 {
                     currentMatches.Remove(foundMatch);
                 }
+                newThrow = gameFact;
                 InvokeAsync(StateHasChanged);
+
             }
 
         });
@@ -73,6 +99,27 @@
             InvokeAsync(StateHasChanged);
 
         });
+    }
+
+    private async Task<List<DartsPlayerModel>> GetAllPlayers()
+    {
+        var allPlayersResult = await _playerService.GetAllPlayersAsync();
+        if (allPlayersResult.IsSucces)
+        {
+            return allPlayersResult.Items.Select(p => new DartsPlayerModel
+            {
+                Id = p.Id,
+                FirstName = p.Firstname,
+                LastName = p.Lastname,
+                Throws = p?.AllThrows.Select(at => new ThrowModel
+                {
+                    BaseNumber = (int)at.Score.OriginalScore,
+                    Throw = (int)at.Score.Score,
+                    TimeStamp = at.TimeStamp
+                }).ToList() ?? new List<ThrowModel>()
+            }).ToList();
+        }
+        else return null;
     }
 
     private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
