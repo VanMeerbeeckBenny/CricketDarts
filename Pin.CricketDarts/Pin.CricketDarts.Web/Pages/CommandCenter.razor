@@ -4,6 +4,7 @@
 @inject IPlayerThrowService _playerThrowService
 @inject IMatchService _matchService
 @inject IPosibleThrowService _posibleThrowService
+@inject IMatchPlayerService _matchPlayerService
 @inject NavigationManager navigation
 
 <Error ErrorMessage="@error"></Error>
@@ -71,7 +72,7 @@
         if (allPosibleThrow == null || posibleBullThrows == null) error = "Something went wrong please restart!";
         isBusyLoadingIndicator = false;
 
-    }  
+    }
 
     private async Task CreateCurrentMatch()
     {
@@ -85,39 +86,50 @@
 
         if (result.IsSucces)
         {
-            maxPlayerCount = result.Items.Count();
-            var players = ConvertToDartsPlayerModel(result.Items.ToList());
 
-            var playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
-            playerOne.IsActiveTurn = true;
+            var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Any()).ToList();
+            maxPlayerCount = playerThatAreNotInMatch.Count();
 
-            var availeblePlayersResult = await _playerService.GetApponentByPlayerId(playerOne.Id);
-            if (availeblePlayersResult.IsSucces)
+            if (maxPlayerCount >= 2)
             {
-                valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
+                var players = ConvertToDartsPlayerModel(playerThatAreNotInMatch);
 
-                maxPlayerCount = valibleCandidated.Count();
-                var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
-                var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
-                if (createMatchResult.IsSucces)
+                var playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+                playerOne.IsActiveTurn = true;
+
+                var availeblePlayersResult = await _playerService.GetApponentByPlayerId(playerOne.Id);
+                if (availeblePlayersResult.IsSucces)
                 {
-                    currentMatch = createMatchResult.Items.Select(cm => new DartsMatchModel
+                    valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
+
+                    maxPlayerCount = valibleCandidated.Count();
+                    var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
+                    var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
+                    if (createMatchResult.IsSucces)
                     {
-                        PlayerOne = playerOne,
-                        PlayerTwo = playerTwo,
-                        Id = cm.Id,
-                        IsActiveMatch = cm.IsActiveGame,
-                    }).FirstOrDefault();
-                    error = String.Empty;
-                    gameIsDoneMessage = string.Empty;
+                        currentMatch = createMatchResult.Items.Select(cm => new DartsMatchModel
+                        {
+                            PlayerOne = playerOne,
+                            PlayerTwo = playerTwo,
+                            Id = cm.Id,
+                            IsActiveMatch = cm.IsActiveGame,
+                        }).FirstOrDefault();
+
+                        await _matchPlayerService.CreateAsync(currentMatch.Id, playerOne.Id);
+                        await _matchPlayerService.CreateAsync(currentMatch.Id, playerTwo.Id);
+
+                        error = String.Empty;
+                        gameIsDoneMessage = string.Empty;
+
+                    }
+                    else error = createMatchResult.ErrorMessage;
+
+
 
                 }
-                else error = createMatchResult.ErrorMessage;
-
-
-
+                else error = availeblePlayersResult.ErrorMessage;
             }
-            else error = availeblePlayersResult.ErrorMessage;
+            else error = "No available players!";
         };
     }
 
@@ -207,7 +219,13 @@
                         {
                             if (isFinischedBefore) player.Score += score.Score;
                             else player.Score += total - score.BaseScore * 3;
-                            await _matchService.UpdateAsync(currentMatch.Id,true,currentMatch.PlayerOne.Score,currentMatch.PlayerTwo.Score);
+                            var resultPlayerMatchFound = await _matchPlayerService.GetByMatchAndPlayerId(currentMatch.Id, player.Id);
+                            if (resultPlayerMatchFound.IsSucces)
+                            {
+                                var foundMatchPlayer = resultPlayerMatchFound.Items.FirstOrDefault();
+                                foundMatchPlayer.Score = player.Score;
+                                await _matchPlayerService.UpdateAsync(foundMatchPlayer.Id,currentMatch.Id,player.Id,player.Score);
+                            }
                         }
                         var gameIsDone = CheckGameIsDone(player);
                         if (gameIsDone) await CloseGame(gameIsDone);
