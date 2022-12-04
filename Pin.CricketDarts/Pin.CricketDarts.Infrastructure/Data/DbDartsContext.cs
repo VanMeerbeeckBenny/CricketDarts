@@ -13,7 +13,8 @@ namespace Pin.CricketDarts.Infrastructure.Data
     {
         public DbSet<Player> Player { get; set; }
         public DbSet<Match> Matches { get; set; }
-        public DbSet<PlayerThrow> PlayerThrows { get; set; }
+        public DbSet<PlayerThrow> PlayerThrow { get; set; }
+        public DbSet<MatchPlayer> MatchPlayer { get; set; }
         public DbSet<Point> Throws { get; set; }
 
         public DbDartsContext(DbContextOptions<DbDartsContext> options):base(options)
@@ -34,6 +35,16 @@ namespace Pin.CricketDarts.Infrastructure.Data
              .HasOne(pt => pt.Score)
              .WithMany(p => p.PlayerThrows)
              .HasForeignKey(p => p.ScoreId);
+
+            modelBuilder.Entity<MatchPlayer>()
+               .HasOne(pt => pt.Player)
+               .WithMany(p => p.Matches)
+               .HasForeignKey(p => p.PlayerId);
+
+            modelBuilder.Entity<MatchPlayer>()
+             .HasOne(pt => pt.Match)
+             .WithMany(p => p.PlayerMatch)
+             .HasForeignKey(p => p.MatchId);
 
             Seeder.Seed(modelBuilder);
         }

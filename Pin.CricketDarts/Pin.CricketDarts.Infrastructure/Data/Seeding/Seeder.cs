@@ -62,20 +62,15 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
             };
 
 
-            var matchPlayer = new[]
+            var matchPlayer = new MatchPlayer[]
             {
-                new {MatchesId = matches[0].Id,PlayersId = players[0].Id},
-                new {MatchesId = matches[1].Id,PlayersId = players[0].Id},
-                new {MatchesId = matches[0].Id,PlayersId = players[1].Id},
-                new {MatchesId = matches[1].Id,PlayersId = players[1].Id},
+                new MatchPlayer{MatchId = matches[0].Id,PlayerId = players[0].Id , Score = 500},
+                new MatchPlayer{MatchId = matches[1].Id,PlayerId = players[0].Id , Score = 200},
+                new MatchPlayer{MatchId = matches[0].Id,PlayerId = players[1].Id , Score = 100},
+                new MatchPlayer{MatchId = matches[1].Id,PlayerId = players[1].Id, Score = 150},
             };
 
-
-            builder.Entity<Player>()
-                .HasMany(p => p.Matches)
-                .WithMany(m => m.Players)
-                .UsingEntity(x => x.HasData(matchPlayer));
-
+   
             builder.Entity<Point>()
                 .HasIndex(t => t.Score)
                 .IsUnique();
