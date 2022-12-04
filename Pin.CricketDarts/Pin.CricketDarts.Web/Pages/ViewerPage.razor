@@ -6,10 +6,10 @@
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
 <div class="d-flex">
-    @if (currentMatches != null && currentMatches.Any())
-    {
-        <div class="d-flex flex-wrap">
-
+   
+    <div class="d-flex flex-wrap w-50">
+        @if (currentMatches != null && currentMatches.Any())
+        {
             @foreach (var match in currentMatches)
             {
                 <div class="mb-3">
@@ -20,9 +20,9 @@
                 </div>
             }
 
-            
-        </div>
-        if (allPlayers != null && allPlayers.Any())
+        }
+    </div>
+        @if (allPlayers != null && allPlayers.Any())
         {
         <div class="w-50">
             <div class="mb-4">
@@ -39,7 +39,7 @@
             </div>
         </div>
         }
-    }
+    
     </div>
 @code {
     private List<ScoresPerNumberModel> allPosibleThrow;
@@ -58,7 +58,11 @@
         allPlayers = await GetAllPlayers();
         await GetAllActiveMatch();
         await GetAllMatches();
+        await ActivateSignalRSenders();
+    }
 
+    private async Task ActivateSignalRSenders()
+    {
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/Cricket-darts"))
         .Build();
@@ -95,13 +99,15 @@
                 currentMatches.Add(match);
                 allMatches.Add(match);
 
-            } else currentMatches.Remove(foundMatch);
+            }
+            else currentMatches.Remove(foundMatch);
             InvokeAsync(StateHasChanged);
 
         });
     }
 
-    private async Task<List<DartsPlayerModel>> GetAllPlayers()
+    private async Task<List<DartsPlayerModel>> GetAllPlayers() //Couldent use this inside topstats component as it would have issues in treathing.
+                                                               //Its a little diffrent then convertToDartsPlayerModel
     {
         var allPlayersResult = await _playerService.GetAllPlayersAsync();
         if (allPlayersResult.IsSucces)
@@ -122,24 +128,6 @@
         else return null;
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
-    {
-        return players.Select(p => new DartsPlayerModel
-        {
-            Id = p.Id,
-            FirstName = p.Firstname,
-            LastName = p.Lastname,
-            Throws = p.AllThrows.Where(at => at.MatchId == matchId)
-                .Select(at => new ThrowModel
-                {
-                    BaseNumber = (int)at.Score.OriginalScore,
-                    Throw = (int)at.Score.Score,
-                    TimeStamp = at.TimeStamp
-
-                }).ToList(),
-            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).Score
-        }).ToList();
-    }
     private async Task GetAllActiveMatch()
     {
         var resultActiveMatch = await _matchService.GetActiveMatches();
@@ -188,5 +176,25 @@
                 allMatches.Add(dartsMatch);
             }
         }
+    }
+
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = p.AllThrows.Where(at => at.MatchId == matchId)
+                .Select(at => new ThrowModel
+                {
+                    BaseNumber = (int)at.Score.OriginalScore,
+                    Throw = (int)at.Score.Score,
+                    TimeStamp = at.TimeStamp
+
+                }).ToList(),
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).Score
+        }).ToList();
     }
 }
