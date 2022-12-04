@@ -1,0 +1,70 @@
+﻿@inject IPlayerService _playerService
+<h5>@Title</h5>
+@if (topPlayers != null && topPlayers.Any())
+{
+<table class="table table-striped small">
+    <thead>
+        <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+       @for (int i = 0; i < 10; i++)
+       {  
+            <tr>
+                <td>@topPlayers[i].Firstname</td>
+                <td>@topPlayers[i].Lastname</td>
+                <td>@topPlayers[i].CountOfThrows</td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+@code {
+    [Parameter]
+    public SignalRThrowModel newThrow { get; set; }
+    [Parameter]
+    public int Devider { get; set; }
+    private List<TopScoreModel> topPlayers;
+    [Parameter]
+    public List<DartsPlayerModel> allPlayers { get; set; }
+    [Parameter]
+    public string Title { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        topPlayers = CreateTopPlayers(allPlayers);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if(newThrow != null)
+        {
+            var foundPlayer = topPlayers.FirstOrDefault(t => t.PlayerId == newThrow.PlayerId);
+            if(foundPlayer != null)
+            {
+                if (newThrow.Throw.Throw / newThrow.Throw.BaseNumber == Devider) foundPlayer.CountOfThrows += 1;
+            }
+            topPlayers = topPlayers.OrderByDescending(tp => tp.CountOfThrows).ToList();
+        }
+    }
+
+
+
+    private List<TopScoreModel> CreateTopPlayers(List<DartsPlayerModel> allPlayers)
+    {
+        return allPlayers.Select(p => new TopScoreModel
+        {
+            PlayerId = p.Id,
+            Firstname = p.FirstName,
+            Lastname = p.LastName,
+            CountOfThrows = p.Throws.Where(t => t.Throw /t.BaseNumber == Devider).Count()
+
+        })
+    .OrderByDescending(t => t.CountOfThrows)
+    .ToList();
+    }
+}
