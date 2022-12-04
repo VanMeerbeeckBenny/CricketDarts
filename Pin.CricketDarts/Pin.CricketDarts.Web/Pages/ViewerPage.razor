@@ -3,7 +3,7 @@
 @inject IPlayerService _playerService
 @inject IPosibleThrowService _posibleThrowService
 <h3>ViewerPage</h3>
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between flex-wrap">
     @if (currentMatches != null && currentMatches.Any())
     {
         foreach (var match in currentMatches)
@@ -12,6 +12,7 @@
                         PosibleBullThrows="posibleBullThrows"
                         CurrentMatch="match"
                         ShowButtons="false"></ScoreBoard>
+       
         }
 
     }
@@ -39,12 +40,13 @@
             LastName = p.Lastname,
             Throws = p.AllThrows.Where(at => at.MatchId == matchId)
                 .Select(at => new ThrowModel
-            {
-                BaseNumber = (int)at.Score.OriginalScore,
-                Throw = (int)at.Score.Score,
-                TimeStamp = at.TimeStamp
+                {
+                    BaseNumber = (int)at.Score.OriginalScore,
+                    Throw = (int)at.Score.Score,
+                    TimeStamp = at.TimeStamp
 
-            }).ToList(),
+                }).ToList(),
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).Score
         }).ToList();
     }
     private async Task GetAllActiveMatch()
@@ -56,9 +58,9 @@
             var matches = resultActiveMatch.Items.ToList();
             foreach (var match in matches)
             {
-                var players = ConvertToDartsPlayerModel(match.Players,match.Id);
-                players[0].Score = match.PlayerOneScore;
-                players[1].Score = match.PlayerTwoScore;
+                var tempPlayers = match.PlayerMatch.Where(pm => pm.MatchId == match.Id).Select(pm => pm.Player).ToList();
+                var players = ConvertToDartsPlayerModel(tempPlayers, match.Id);
+
                 currentMatch = new DartsMatchModel
                 {
                     Id = match.Id,
