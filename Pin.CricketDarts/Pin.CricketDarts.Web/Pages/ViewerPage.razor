@@ -2,7 +2,11 @@
 @inject IMatchService _matchService
 @inject IPlayerService _playerService
 @inject IPosibleThrowService _posibleThrowService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.SignalR.Client
 <h3>ViewerPage</h3>
+
 <div class="d-flex justify-content-between flex-wrap">
     @if (currentMatches != null && currentMatches.Any())
     {
@@ -12,7 +16,7 @@
                         PosibleBullThrows="posibleBullThrows"
                         CurrentMatch="match"
                         ShowButtons="false"></ScoreBoard>
-       
+
         }
 
     }
@@ -21,7 +25,7 @@
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
     private List<DartsMatchModel> currentMatches = new();
-
+    private HubConnection hubConnection;
 
     protected async override Task OnInitializedAsync()
     {
@@ -29,9 +33,46 @@
         allPosibleThrow = await _posibleThrowService.CreateAllThrows();
         posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
         await GetAllActiveMatch();
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl(NavigationManager.ToAbsoluteUri("/Cricket-darts"))
+        .Build();
+
+
+        await hubConnection.StartAsync();
+
+        hubConnection.On<SignalRThrowModel>("SendThrow", (gameFact) =>
+        {
+
+            var foundMatch = currentMatches.FirstOrDefault(m => m.Id == gameFact.MatchId);
+            if (foundMatch != null)
+            {
+                var dartsPlayer = foundMatch.PlayerOne.Id == gameFact.PlayerId ? foundMatch.PlayerOne : foundMatch.PlayerTwo;
+                dartsPlayer.Throws.Add(gameFact.Throw);
+                dartsPlayer.Score = gameFact.CurrentScore;
+                if (gameFact.IsDone)
+                {
+                    currentMatches.Remove(foundMatch);
+                }
+                InvokeAsync(StateHasChanged);
+            }
+
+        });
+
+        hubConnection.On<DartsMatchModel>("SendMatch", (match) =>
+        {
+
+            var foundMatch = currentMatches.FirstOrDefault(m => m.Id == match.Id);
+            if (foundMatch == null)
+            {
+                currentMatches.Add(match);
+
+            }else currentMatches.Remove(foundMatch);
+            InvokeAsync(StateHasChanged);
+
+        });
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players,Guid matchId)
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
     {
         return players.Select(p => new DartsPlayerModel
         {
