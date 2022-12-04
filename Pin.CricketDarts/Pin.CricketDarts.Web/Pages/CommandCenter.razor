@@ -7,6 +7,8 @@
 @inject IMatchPlayerService _matchPlayerService
 @inject NavigationManager navigation
 
+@using Microsoft.AspNetCore.SignalR.Client
+
 <Error ErrorMessage="@error"></Error>
 <LoadingScreen IsBusy="@isBusyLoadingIndicator"></LoadingScreen>
 @if (allPosibleThrow != null)
@@ -120,6 +122,7 @@
 
                         error = String.Empty;
                         gameIsDoneMessage = string.Empty;
+                        await SaveNewMatch(currentMatch);
 
                     }
                     else error = createMatchResult.ErrorMessage;
@@ -164,7 +167,7 @@
                         TimeStamp = t.TimeStamp
                     }).ToList();
                 }
-                await AddScore(currentPlayer,score);
+                await AddScore(currentPlayer, score);
             }
         }
         else error = "Please create a match!";
@@ -224,16 +227,56 @@
                             {
                                 var foundMatchPlayer = resultPlayerMatchFound.Items.FirstOrDefault();
                                 foundMatchPlayer.Score = player.Score;
-                                await _matchPlayerService.UpdateAsync(foundMatchPlayer.Id,currentMatch.Id,player.Id,player.Score);
+                                await _matchPlayerService.UpdateAsync(foundMatchPlayer.Id, currentMatch.Id, player.Id, player.Score);
                             }
                         }
-                        var gameIsDone = CheckGameIsDone(player);
-                        if (gameIsDone) await CloseGame(gameIsDone);
+
                         break;
                     }
                 }
             }
+            var gameIsDone = CheckGameIsDone(player);
+            if (gameIsDone) {
+                await SaveNewThrow(score, player,true);
+                await CloseGame(gameIsDone);
+            }
+            else await SaveNewThrow(score, player);
         }
+    }
+
+    private async Task SaveNewThrow(ScoreModel score, DartsPlayerModel player, bool gameIsDone = false)
+    {
+        var signalrThrowModel = new SignalRThrowModel
+        {
+            Throw = new ThrowModel
+            {
+                BaseNumber = score.BaseScore,
+                Throw = score.Score,
+                TimeStamp = DateTime.Now
+            },
+            CurrentScore = player.Score,
+            MatchId = currentMatch.Id,
+            PlayerId = player.Id,
+            IsDone = gameIsDone
+        };
+
+        HubConnection hubConnection = new HubConnectionBuilder()
+            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
+            .Build();
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("SendThrow", signalrThrowModel);
+    }
+
+    private async Task SaveNewMatch(DartsMatchModel match)
+    {
+
+        HubConnection hubConnection = new HubConnectionBuilder()
+            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
+            .Build();
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("SendMatch", match);
     }
 
     private async Task CloseGame(bool gameIsDone)
