@@ -6,7 +6,9 @@ using Pin.CricketDarts.Core.Interfaces.Services;
 using Pin.CricketDarts.Core.Services;
 using Pin.CricketDarts.Infrastructure.Data;
 using Pin.CricketDarts.Infrastructure.Repositories;
+using Pin.CricketDarts.Web.Hubs;
 using Pin.CricketDarts.Web.Interfaces;
+using Pin.CricketDarts.Web.Models;
 using Pin.CricketDarts.Web.Services;
 
 namespace Pin.CricketDarts.Web
@@ -32,7 +34,8 @@ namespace Pin.CricketDarts.Web
             builder.Services.AddScoped<IMatchPlayerService, MatchPlayerService>();
             // Add services to the container.
             builder.Services.AddRazorPages();
-            builder.Services.AddServerSideBlazor();         
+            builder.Services.AddServerSideBlazor();
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -51,6 +54,7 @@ namespace Pin.CricketDarts.Web
             app.UseRouting();
 
             app.MapBlazorHub();
+            app.MapHub<CricketDartsHub>("/Cricket-darts");
             app.MapFallbackToPage("/_Host");
 
             app.Run();
