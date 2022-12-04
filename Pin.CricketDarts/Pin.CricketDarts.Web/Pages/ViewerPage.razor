@@ -25,6 +25,7 @@
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
     private List<DartsMatchModel> currentMatches = new();
+    private List<DartsMatchModel> allMatches = new();
     private HubConnection hubConnection;
 
     protected async override Task OnInitializedAsync()
@@ -33,6 +34,7 @@
         allPosibleThrow = await _posibleThrowService.CreateAllThrows();
         posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
         await GetAllActiveMatch();
+        await GetAllMatches();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/Cricket-darts"))
         .Build();
@@ -65,8 +67,9 @@
             if (foundMatch == null)
             {
                 currentMatches.Add(match);
+                allMatches.Add(match);
 
-            }else currentMatches.Remove(foundMatch);
+            } else currentMatches.Remove(foundMatch);
             InvokeAsync(StateHasChanged);
 
         });
@@ -116,6 +119,27 @@
             }
 
 
+        }
+    }
+
+    private async Task GetAllMatches()
+    {
+        var resultAllMatch = await _matchService.GetAllAsync();
+        if (resultAllMatch.IsSucces)
+        {
+            foreach (var match in resultAllMatch.Items)
+            {
+                var tempPlayer = match.PlayerMatch.Select(pm => pm.Player).ToList();
+                var player = ConvertToDartsPlayerModel(tempPlayer, match.Id);
+                DartsMatchModel dartsMatch = new DartsMatchModel
+                {
+                    Id = match.Id,
+                    IsActiveMatch = match.IsActiveGame,
+                    PlayerOne = player[0],
+                    PlayerTwo = player[1]
+                };
+                allMatches.Add(dartsMatch);
+            }
         }
     }
 }
