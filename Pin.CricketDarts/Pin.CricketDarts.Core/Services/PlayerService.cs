@@ -104,11 +104,11 @@ namespace Pin.CricketDarts.Core.Services
             valibleCandidated.Remove(currentPlayer);//player can not play agains him self
             if (currentPlayer == null) return new ItemResultModel<Player> { ErrorMessage = "Player not found!" };
 
-            foreach (Guid matchId in currentPlayer.Matches.Select(m => m.Id))
+            foreach (Guid matchId in currentPlayer.Matches.Select(m => m.MatchId))
             {
                 foreach (var player in allPlayer)
                 {
-                    if (player.Matches.Select(m => m.Id).Contains(matchId))
+                    if (player.Matches.Select(m => m.MatchId).Contains(matchId))
                     {
                         var foundPlayer = valibleCandidated.FirstOrDefault(v => v.Id == player.Id);
                         valibleCandidated.Remove(foundPlayer);
