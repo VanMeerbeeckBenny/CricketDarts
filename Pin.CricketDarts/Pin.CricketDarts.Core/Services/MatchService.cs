@@ -32,11 +32,8 @@ namespace Pin.CricketDarts.Core.Services
 
             Match newMatch = new Match
             {                
-                IsActiveGame = true,
-                PlayerOneScore = 0,
-                PlayerTwoScore = 0,
-                TimeStamp = DateTime.Now,
-                Players = new List<Player> { playerOne, playerTwo }
+                IsActiveGame = true,              
+                TimeStamp = DateTime.Now,             
             };
 
             if (!await _matchRepository.CreateAsync(newMatch))
@@ -50,9 +47,7 @@ namespace Pin.CricketDarts.Core.Services
             Match foundMatch = await _matchRepository.GetByIdAsync(id);
             if (foundMatch == null) return new ItemResultModel<Match> { ErrorMessage = "No sutch match!" };
 
-            foundMatch.IsActiveGame = isActive;
-            foundMatch.PlayerOneScore = playerOneScore;
-            foundMatch.PlayerTwoScore = PlayerTwoScore;
+            foundMatch.IsActiveGame = isActive;     
             
             bool isSucces = await _matchRepository.UpdateAsync(foundMatch);
             if (!isSucces) return new ItemResultModel<Match> { ErrorMessage = "Something went wrong, please try again later!" };

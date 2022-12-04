@@ -19,27 +19,28 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
 
         public async override Task<IEnumerable<Match>> GetAllAsync()
         {
-            return await _table.Include(m => m.Players)
+            return await _table.Include(m => m.PlayerMatch)
                          .OrderByDescending(m => m.TimeStamp)
                          .ToListAsync();
         }
 
         public async override Task<Match> GetByIdAsync(Guid id)
         {
-            return await _table.Include(m => m.Players)
+            return await _table.Include(m => m.PlayerMatch)
                          .FirstOrDefaultAsync(m => m.Id == id);
         }
 
         public async Task<IEnumerable<Match>>GetByUserIdAsync(Guid userId)
         {
-            return await _table.Include(m => m.Players)
-                               .Where(m => m.Players.Select(p => p.Id).Contains(userId))
+            return await _table.Include(m => m.PlayerMatch)
+                               .Where(m => m.PlayerMatch.Select(p => p.PlayerId).Contains(userId))
                                .ToListAsync();
         }
 
         public async Task<List<Match>> GetActiveMatches()
         {
-            return await _table.Include(m => m.Players)
+            return await _table.Include(m => m.PlayerMatch)
+                         .ThenInclude(p => p.Player)
                          .ThenInclude(p => p.AllThrows)
                          .OrderByDescending(m => m.TimeStamp)
                          .Where(m => m.IsActiveGame == true)
