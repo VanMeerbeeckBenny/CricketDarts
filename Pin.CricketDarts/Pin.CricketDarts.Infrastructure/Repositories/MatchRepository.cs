@@ -20,6 +20,8 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         public async override Task<IEnumerable<Match>> GetAllAsync()
         {
             return await _table.Include(m => m.PlayerMatch)
+                         .ThenInclude(pm => pm.Player)
+                         .ThenInclude(p => p.AllThrows)
                          .OrderByDescending(m => m.TimeStamp)
                          .ToListAsync();
         }
