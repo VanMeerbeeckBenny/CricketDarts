@@ -13,6 +13,7 @@ namespace Pin.CricketDarts.Core.Interfaces.Services
         Task<ItemResultModel<Match>>CreateAsync(Guid playeroneId, Guid playerTwoId);
         Task<ItemResultModel<Match>> UpdateAsync(Guid id,bool isActive,int playerOneScore,int PlayerTwoScore);
         Task<ItemResultModel<Match>> GetActiveMatches();
+        Task<ItemResultModel<Match>> GetAllAsync();
 
     }
 }
