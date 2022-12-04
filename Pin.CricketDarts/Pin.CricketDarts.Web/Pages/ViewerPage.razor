@@ -58,17 +58,20 @@
             var matches = resultActiveMatch.Items.ToList();
             foreach (var match in matches)
             {
-                var tempPlayers = match.PlayerMatch.Where(pm => pm.MatchId == match.Id).Select(pm => pm.Player).ToList();
-                var players = ConvertToDartsPlayerModel(tempPlayers, match.Id);
-
-                currentMatch = new DartsMatchModel
+                if (match.PlayerMatch.Count >= 2)
                 {
-                    Id = match.Id,
-                    IsActiveMatch = match.IsActiveGame,
-                    PlayerOne = players[0],
-                    PlayerTwo = players[1],
-                };
-                currentMatches.Add(currentMatch);
+                    var tempPlayers = match.PlayerMatch.Where(pm => pm.MatchId == match.Id).Select(pm => pm.Player).ToList();
+                    var players = ConvertToDartsPlayerModel(tempPlayers, match.Id);
+
+                    currentMatch = new DartsMatchModel
+                    {
+                        Id = match.Id,
+                        IsActiveMatch = match.IsActiveGame,
+                        PlayerOne = players[0],
+                        PlayerTwo = players[1],
+                    };
+                    currentMatches.Add(currentMatch);
+                }
             }
 
 
