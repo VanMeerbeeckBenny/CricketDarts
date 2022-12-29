@@ -5,7 +5,9 @@
 @inject IMatchService _matchService
 @inject IPosibleThrowService _posibleThrowService
 @inject IMatchPlayerService _matchPlayerService
+@inject ISignalRService _sigalRService
 @inject NavigationManager navigation
+
 
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -130,7 +132,7 @@
 
                         error = String.Empty;
                         gameIsDoneMessage = string.Empty;
-                        await SendNewMatch(currentMatch);
+                        await _sigalRService.SendNewMatch(currentMatch);
 
                     }
                     else error = createMatchResult.ErrorMessage;
@@ -245,58 +247,12 @@
             }
             var gameIsDone = CheckGameIsDone(player);
             if (gameIsDone) {
-                await SaveNewThrow(score, player,true);
+                await _sigalRService.SendNewThrow(currentMatch,score, player,true);
                 await CloseGame(gameIsDone);
             }
-            else await SaveNewThrow(score, player);
+            else await _sigalRService.SendNewThrow(currentMatch,score, player);
         }
-    }
-
-    private async Task SaveNewThrow(ScoreModel score, DartsPlayerModel player, bool gameIsDone = false)
-    {
-        var signalrThrowModel = new SignalRThrowModel
-        {
-            Throw = new ThrowModel
-            {
-                BaseNumber = score.BaseScore,
-                Throw = score.Score,
-                TimeStamp = DateTime.Now
-            },
-            CurrentScore = player.Score,
-            MatchId = currentMatch.Id,
-            PlayerId = player.Id,
-            IsDone = gameIsDone
-        };
-
-        HubConnection hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
-            .Build();
-
-        await hubConnection.StartAsync();
-        await hubConnection.SendAsync("SendThrow", signalrThrowModel);
-    }
-
-    private async Task SendNewMatch(DartsMatchModel match)
-    {
-
-        HubConnection hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
-            .Build();
-
-        await hubConnection.StartAsync();
-        await hubConnection.SendAsync("SendMatch", match);
-    }
-
-    private async Task SendNewWinner(DartsPlayerModel player)
-    {
-
-        HubConnection hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
-            .Build();
-
-        await hubConnection.StartAsync();
-        await hubConnection.SendAsync("SendWinner", player);
-    }
+    }   
 
     private async Task CloseGame(bool gameIsDone)
     {
@@ -315,7 +271,7 @@
             if (isSame) gameIsDoneMessage += $"{winner.FirstName}-{winner.LastName} has finisched the game first!!";
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
-            await SendNewWinner(winner);
+            await _sigalRService.SendNewWinner(winner);
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;
         }
