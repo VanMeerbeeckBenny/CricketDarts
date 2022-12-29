@@ -8,9 +8,9 @@
 @inject ISignalRService _sigalRService
 @inject NavigationManager navigation
 
-
 @using Microsoft.AspNetCore.SignalR.Client
 
+<div class="viewer"></div>
 <Error ErrorMessage="@error"></Error>
 <LoadingScreen IsBusy="@isBusyLoadingIndicator"></LoadingScreen>
 @if (allPosibleThrow != null)
@@ -24,7 +24,7 @@
                              OnSelected="ProcessThrow"></DartSegment>
             }
         </div>
-        <div class="d-flex justify-content-center mt-5" id="bull-container">
+        <div class="d-flex justify-content-center mt-3" id="bull-container">
             <div id="outer-bull" class="d-flex justify-content-center align-items-center" @onclick="e => ProcessThrow(posibleBullThrows[0])">
                 <div id="inner-bull" @onclick="e => ProcessThrow(posibleBullThrows[1])" @onclick:stopPropagation></div>
             </div>
@@ -41,11 +41,19 @@
     }
     @if (currentMatch != null && string.IsNullOrWhiteSpace(error))
     {
-
-        <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                    PosibleBullThrows="posibleBullThrows"
-                    CurrentMatch="currentMatch"></ScoreBoard>
-
+        <div class="d-flex justify-content-center">
+            <figure class="d-flex align-items-center justify-content-center">
+                <img src="/images/darts.png" />
+            </figure>
+            <div class="w-100">
+                <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                            PosibleBullThrows="posibleBullThrows"
+                            CurrentMatch="currentMatch"></ScoreBoard>
+            </div>
+            <figure class="d-flex align-items-center justify-content-center">
+                <img src="/images/darts.png" />
+            </figure>
+        </div>
     }
 
     <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />

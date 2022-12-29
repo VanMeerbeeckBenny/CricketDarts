@@ -5,7 +5,7 @@
                 <span>@CurrentMatch.PlayerOne.FirstName @CurrentMatch.PlayerOne.LastName</span>
                 @if (ShowButtons)
                 {
-                    <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)" />
+                    <input type="button" class="btn btn-primary ms-1" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)" />
                 }
                 </div>
             <div class="number-empty my-border-bottom"></div>
@@ -13,7 +13,7 @@
                 <span>@CurrentMatch.PlayerTwo.FirstName @CurrentMatch.PlayerTwo.LastName</span>
                 @if (ShowButtons)
                 {
-                    <input type="button" class="btn btn-primary" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerTwo)" />
+                    <input type="button" class="btn btn-primary ms-1" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerTwo)" />
                 }
             </div>
         </div>

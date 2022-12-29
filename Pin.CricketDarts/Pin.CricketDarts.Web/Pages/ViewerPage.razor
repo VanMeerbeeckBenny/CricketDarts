@@ -5,48 +5,50 @@
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
-<div class="d-flex">
-   
-    <div class="d-flex flex-wrap w-50">
-        @if (currentMatches != null && currentMatches.Any())
-        {
-            @foreach (var match in currentMatches)
-            {
-                <div class="mb-3">
-                    <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                                PosibleBullThrows="posibleBullThrows"
-                                CurrentMatch="match"
-                                ShowButtons="false"></ScoreBoard>
-                </div>
-            }
+<div class="viewer"></div>
+    <div class="d-flex pt-3">
 
-        }
-    </div>
+        <div class="d-flex flex-wrap w-50">
+            @if (currentMatches != null && currentMatches.Any())
+            {
+                @foreach (var match in currentMatches)
+                {
+                    <div class="mb-3">
+                        <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                                    PosibleBullThrows="posibleBullThrows"
+                                    CurrentMatch="match"
+                                    ShowButtons="false"></ScoreBoard>
+                    </div>
+                }
+
+            }
+        </div>
         @if (allPlayers != null && allPlayers.Any())
         {
-        <div class="w-50">
-            <div class="mb-4">
-                <TopStats newThrow="newThrow"
-                          Devider="2"
-                          allPlayers="allPlayers"
-                          Title="Top Double"></TopStats>
-            </div>
-            <div>
-                <TopStats newThrow="newThrow"
-                          Devider="3"
-                          allPlayers="allPlayers"
-                          Title="Top Triple"></TopStats>
-            </div>
-            <div>
-                <TopWonGames AllMatches="allMatches"
-                             NewWinner="newWinner">
+            <div class="w-50">
+                <div class="mb-4">
+                    <TopStats newThrow="newThrow"
+                              Devider="2"
+                              allPlayers="allPlayers"
+                              Title="Top Double"></TopStats>
+                </div>
+                <div>
+                    <TopStats newThrow="newThrow"
+                              Devider="3"
+                              allPlayers="allPlayers"
+                              Title="Top Triple"></TopStats>
+                </div>
+                <div>
+                    <TopWonGames AllMatches="allMatches"
+                                 NewWinner="newWinner">
 
-                </TopWonGames>
+                    </TopWonGames>
+                </div>
             </div>
-        </div>
         }
-    
+
     </div>
+
 @code {
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
