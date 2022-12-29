@@ -11,14 +11,12 @@
                 <th>Amount</th>
             </tr>
         </thead>
-        <tbody>
-            @*@for (int i = 0; i < 10; i++)
-                {*@
+        <tbody>       
             @foreach (var player in filteredTopPlayers)
             {
               
                 <tr>
-                    <td>@player.Firstname</td>
+                    <td>@(filteredTopPlayers.IndexOf(player)+1)) @player.Firstname</td>
                     <td>@player.Lastname</td>
                     <td>@player.CountOfThrows</td>
                 </tr>
