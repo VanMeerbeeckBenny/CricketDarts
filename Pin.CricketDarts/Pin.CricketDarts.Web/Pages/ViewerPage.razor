@@ -55,7 +55,7 @@
     private HubConnection hubConnection;
     private SignalRThrowModel newThrow;
     private List<DartsPlayerModel> allPlayers;
-    private DartsPlayerWin newWinner;
+    private DartsPlayerWinModel newWinner;
 
     protected async override Task OnInitializedAsync()
     {
@@ -115,7 +115,7 @@
         hubConnection.On<DartsPlayerModel>("SendWinner", async(player) =>
         {
 
-            var newWinningPlayer = new DartsPlayerWin
+            var newWinningPlayer = new DartsPlayerWinModel
             {
                 Id = player.Id,
                 Firstname = player.FirstName,
