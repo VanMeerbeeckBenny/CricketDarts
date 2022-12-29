@@ -60,6 +60,7 @@
         {
             filteredTopPlayers = topPlayers.OrderByDescending(tp => tp.CountOfThrows)
                                    .Where(tp => tp.CountOfThrows > 0)
+                                   .Take(5)
                                    .ToList();
         }
     }
