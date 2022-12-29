@@ -37,6 +37,12 @@
                           allPlayers="allPlayers"
                           Title="Top Triple"></TopStats>
             </div>
+            <div>
+                <TopWonGames AllMatches="allMatches"
+                             NewWinner="newWinner">
+
+                </TopWonGames>
+            </div>
         </div>
         }
     
@@ -49,6 +55,7 @@
     private HubConnection hubConnection;
     private SignalRThrowModel newThrow;
     private List<DartsPlayerModel> allPlayers;
+    private DartsPlayerWin newWinner;
 
     protected async override Task OnInitializedAsync()
     {
@@ -102,6 +109,22 @@
             }
             else currentMatches.Remove(foundMatch);
             InvokeAsync(StateHasChanged);
+
+        });
+
+        hubConnection.On<DartsPlayerModel>("SendWinner", async(player) =>
+        {
+
+            var newWinningPlayer = new DartsPlayerWin
+            {
+                Id = player.Id,
+                Firstname = player.FirstName,
+                Lastname = player.LastName,
+                WonMatches = 1
+            };
+            newWinner = newWinningPlayer;
+            await InvokeAsync(StateHasChanged);
+            newWinner = null;
 
         });
     }
