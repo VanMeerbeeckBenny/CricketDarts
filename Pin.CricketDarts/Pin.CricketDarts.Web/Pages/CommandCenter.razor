@@ -56,6 +56,7 @@
     private DartsMatchModel currentMatch;
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
+    DartsPlayerModel playerWhoFinischedFirst;
     private string error = "";
     private bool isBusyLoadingIndicator;
     private string gameIsDoneMessage = "";
@@ -301,9 +302,17 @@
     {
         var winner = currentMatch.PlayerOne.Score > currentMatch.PlayerTwo.Score ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
         var loser = currentMatch.PlayerOne.Score < currentMatch.PlayerTwo.Score ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+        bool isSame = false;
+        if (currentMatch.PlayerOne.Score == currentMatch.PlayerTwo.Score)
+        {
+            winner = playerWhoFinischedFirst;
+            loser = currentMatch.PlayerOne == winner ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+            isSame = true;
+        }
         if (gameIsDone)
         {
-            gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!";
+            gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!\n";
+            if (isSame) gameIsDoneMessage += $"{winner.FirstName}-{winner.LastName} has finisched the game first!!";
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
             await SendNewWinner(winner);
@@ -316,7 +325,13 @@
     {
 
         DartsPlayerModel opponent = currentMatch.PlayerOne == player ? currentMatch.PlayerTwo : currentMatch.PlayerOne;
-        if (CheckPlayerIsDone(player) && CheckPlayerIsDone(opponent)) return true;
+        bool playerIsFinisched = CheckPlayerIsDone(player);
+        bool opponentIsFinisched = CheckPlayerIsDone(opponent);
+        if(playerIsFinisched != opponentIsFinisched)
+        {
+            playerWhoFinischedFirst = playerIsFinisched ? player : opponent;
+        }
+        if (playerIsFinisched && opponentIsFinisched) return true;
         return false;
     }
 
