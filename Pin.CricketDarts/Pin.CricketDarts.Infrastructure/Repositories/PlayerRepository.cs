@@ -21,6 +21,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         {
             return await _table
                         .Include(p => p.Matches)
+                        .ThenInclude(p => p.Match)
                         .Include(p => p.AllThrows)
                         .ThenInclude(at => at.Score)
                         .FirstOrDefaultAsync(p => p.Id == id);
@@ -29,6 +30,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         {
             return await _table
                         .Include(p => p.Matches)
+                        .ThenInclude(p => p.Match)
                         .Include(p => p.AllThrows)  
                         .ThenInclude(at => at.Score)
                         .ToListAsync();
@@ -38,6 +40,7 @@ namespace Pin.CricketDarts.Infrastructure.Repositories
         {
             return  await _table
                         .Include(p => p.Matches)
+                        .ThenInclude(p => p.Match)
                         .Where(p => p.Matches.Select(m => m.Id).Contains(matchId))                               
                         .ToListAsync();                       
                               
