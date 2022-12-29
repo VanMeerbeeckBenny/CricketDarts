@@ -95,7 +95,7 @@
             DartsPlayerModel playerOne = new();
             if (maxPlayerCount >= 2)
             {
-                var players = ConvertToDartsPlayerModel(playerThatAreNotInMatch);
+                var players = ConvertToDartsPlayerModel(playerThatAreNotInMatch);//Find suitable playerOne
 
                 while (players.Count >= 2 && !availeblePlayersResult.IsSucces)
                 {
@@ -106,13 +106,13 @@
                     if (!availeblePlayersResult.IsSucces) players.Remove(playerOne);
                     maxPlayerCount = players.Count();
                 }
-
+                //end
                 if (availeblePlayersResult.IsSucces)
                 {
-                    valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
+                    valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());//Find suitable playerTwo
 
                     maxPlayerCount = valibleCandidated.Count();
-                    var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];
+                    var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];//end
                     var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
                     if (createMatchResult.IsSucces)
                     {
