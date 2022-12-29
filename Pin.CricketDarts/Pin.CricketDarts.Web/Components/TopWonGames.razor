@@ -81,15 +81,14 @@
         if(NewWinner != null)
         {
             var foundPlayer = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
-            if (foundPlayer != null)
-            {
-                foundPlayer.WonMatches++;
-                foundPlayer.AverageScore = await CalculatePlayerAverageScore(foundPlayer.Id);
-            }
-            else
-            {
-                NewWinner.AverageScore = await CalculatePlayerAverageScore(NewWinner.Id);
+            if (foundPlayer != null)         
+                foundPlayer.WonMatches++;            
+            else            
                 Players.Add(NewWinner);
+            
+            foreach (var player in Players)
+            {
+                player.AverageScore = await CalculatePlayerAverageScore(player.Id);
             }
             Players = Players.OrderByDescending(p => p.WonMatches)
                              .ThenByDescending(p => p.AverageScore)
