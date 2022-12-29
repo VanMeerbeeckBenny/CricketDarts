@@ -14,5 +14,10 @@ namespace Pin.CricketDarts.Web.Hubs
         {
             await Clients.Others.SendAsync("SendMatch", match);
         }
+
+        public async Task SendWinner(DartsPlayerModel player)
+        {
+            await Clients.Others.SendAsync("SendWinner", player);
+        }
     }
 }
