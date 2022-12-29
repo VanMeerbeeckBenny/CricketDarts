@@ -181,3 +181,31 @@ font-weight:bolder;
 .error-message{
     border-radius:5px;
 }
+
+.btn-command-center{
+    position:relative;
+    bottom:130px;
+    left:20px;
+}
+
+.btn-viewer{
+    position: relative;
+    bottom: 130px;
+    left: 820px;
+}
+.header{
+    width:fit-content;
+    margin:0 auto;
+}
+
+.viewer {
+    z-index:-1;
+    position:absolute;
+    background-image: url(../images/dartBoard.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 90%;
+    opacity:0.2;
+    height:100vh;
+    width:97vw;
+}
