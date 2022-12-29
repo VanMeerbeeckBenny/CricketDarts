@@ -8,19 +8,20 @@
             <tr>
                 <th>Firstname</th>
                 <th>Lastname</th>
-                <th>WonMatches</th>
+                <th>Wins</th>
+                <th>Averige score</th>
             </tr>
         </thead>
         <tbody>
-            @*@for (int i = 0; i < 10; i++)
-                {*@
+     
             @foreach (var player in Players)
             {
 
                 <tr>
                     <td>@player.Firstname</td>
                     <td>@player.Lastname</td>
-                    <td>@player.WonMatches</td>
+                    <td>@player.WonMatches</td>                  
+                    <td>@player.AverageScore</td>                
                 </tr>
 
             }
@@ -33,49 +34,80 @@
     [Parameter]
     public List<DartsMatchModel> AllMatches { get; set;}
     [Parameter]
-    public DartsPlayerWin NewWinner { get; set; }
-    private List<DartsPlayerWin> Players = new();
+    public DartsPlayerWinModel NewWinner { get; set; }
+    private List<DartsPlayerWinModel> Players = new();
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
         foreach (var match in AllMatches)
         {
-            CheckWinner(match);
+            await CheckWinner(match);
         }
-        Players = Players.OrderByDescending(p => p.WonMatches).ToList();
+        Players = Players.OrderByDescending(p => p.WonMatches)
+                         .ThenByDescending(p => p.AverageScore)
+                         .ToList();
     }
 
-    private void CheckWinner(DartsMatchModel match)
+
+    private async Task CheckWinner(DartsMatchModel match)
     {
         if (!match.IsActiveMatch)
         {
             var winningPlayer = match.PlayerTwo.Score > match.PlayerOne.Score ? match.PlayerTwo : match.PlayerOne;
             var playerIsFound = Players.FirstOrDefault(p => p.Id == winningPlayer.Id);
-            if (playerIsFound != null) playerIsFound.WonMatches++;
+            if (playerIsFound != null)
+            {
+                playerIsFound.WonMatches++;
+                playerIsFound.AverageScore = await CalculatePlayerAverageScore(winningPlayer.Id);
+            }
             else
             {
-                var newWinningPlayer = new DartsPlayerWin
+                var newWinningPlayer = new DartsPlayerWinModel
                 {
                     Id = winningPlayer.Id,
                     Firstname = winningPlayer.FirstName,
                     Lastname = winningPlayer.LastName,
-                    WonMatches = 1
+                    WonMatches = 1,
+                    AverageScore = await CalculatePlayerAverageScore(winningPlayer.Id)
                 };
                 Players.Add(newWinningPlayer);
             }
         }
     }
 
-    protected override void OnParametersSet()
+    protected async override Task OnParametersSetAsync()
     {
         base.OnParametersSet();
         if(NewWinner != null)
         {
             var foundPlayer = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
-            if (foundPlayer != null) foundPlayer.WonMatches++;
-            else Players.Add(NewWinner);
+            if (foundPlayer != null)
+            {
+                foundPlayer.WonMatches++;
+                foundPlayer.AverageScore = await CalculatePlayerAverageScore(foundPlayer.Id);
+            }
+            else
+            {
+                NewWinner.AverageScore = await CalculatePlayerAverageScore(NewWinner.Id);
+                Players.Add(NewWinner);
+            }
             Players = Players.OrderByDescending(p => p.WonMatches)
+                             .ThenByDescending(p => p.AverageScore)
                              .ToList();
         }
+    }
+
+    private async Task<int> CalculatePlayerAverageScore(Guid id)
+    {
+        var result =await _playerService.GetPlayerByIdAsync(id);
+        if(result.IsSucces)
+        {
+            var player = result.Items.FirstOrDefault();
+            List<int> scores = player.Matches.Where(m => !m.Match.IsActiveGame)
+                                            .Select(m => m.Score).ToList();
+            int averageScore = scores.Any() ?(int)scores.Average() : 0;
+            return averageScore;
+        }
+        return 0;
     }
 }
