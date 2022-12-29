@@ -89,17 +89,24 @@
         if (result.IsSucces)
         {
 
-            var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Contains(true)).ToList();
+            var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Any(m => m.Match.IsActiveGame == true)).ToList();
             maxPlayerCount = playerThatAreNotInMatch.Count();
-
+            ItemResultModel<Player> availeblePlayersResult = new();
+            DartsPlayerModel playerOne = new();
             if (maxPlayerCount >= 2)
             {
                 var players = ConvertToDartsPlayerModel(playerThatAreNotInMatch);
 
-                var playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
-                playerOne.IsActiveTurn = true;
+                while (players.Count >= 2 && !availeblePlayersResult.IsSucces)
+                {
+                    playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
+                    playerOne.IsActiveTurn = true;
 
-                var availeblePlayersResult = await _playerService.GetApponentByPlayerId(playerOne.Id);
+                    availeblePlayersResult = await _playerService.GetApponentByPlayerId(playerOne.Id);
+                    if (!availeblePlayersResult.IsSucces) players.Remove(playerOne);
+                    maxPlayerCount = players.Count();
+                }
+
                 if (availeblePlayersResult.IsSucces)
                 {
                     valibleCandidated = ConvertToDartsPlayerModel(availeblePlayersResult.Items.ToList());
