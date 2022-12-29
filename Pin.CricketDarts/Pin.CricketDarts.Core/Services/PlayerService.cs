@@ -116,7 +116,7 @@ namespace Pin.CricketDarts.Core.Services
                 }
             }
             
-            valibleCandidated = valibleCandidated.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Any()).ToList();//check for any active games
+            valibleCandidated = valibleCandidated.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Contains(true)).ToList();//check for any active games
             if (!valibleCandidated.Any()) return new ItemResultModel<Player> { ErrorMessage = "No Posible apponent found!" };
             return new ItemResultModel<Player> { IsSucces = true,Items = valibleCandidated };
         }
