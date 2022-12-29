@@ -130,7 +130,7 @@
 
                         error = String.Empty;
                         gameIsDoneMessage = string.Empty;
-                        await SaveNewMatch(currentMatch);
+                        await SendNewMatch(currentMatch);
 
                     }
                     else error = createMatchResult.ErrorMessage;
@@ -276,7 +276,7 @@
         await hubConnection.SendAsync("SendThrow", signalrThrowModel);
     }
 
-    private async Task SaveNewMatch(DartsMatchModel match)
+    private async Task SendNewMatch(DartsMatchModel match)
     {
 
         HubConnection hubConnection = new HubConnectionBuilder()
@@ -306,7 +306,7 @@
         if (currentMatch.PlayerOne.Score == currentMatch.PlayerTwo.Score)
         {
             winner = playerWhoFinischedFirst;
-            loser = currentMatch.PlayerOne == winner ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
+            loser = currentMatch.PlayerOne == winner ? currentMatch.PlayerTwo : currentMatch.PlayerOne;
             isSame = true;
         }
         if (gameIsDone)
