@@ -1,0 +1,81 @@
+﻿@inject IPlayerService _playerService
+
+@if (Players != null && Players.Any())
+{
+   <h3>TopWonGames</h3>
+    <table class="table table-striped small">
+        <thead>
+            <tr>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>WonMatches</th>
+            </tr>
+        </thead>
+        <tbody>
+            @*@for (int i = 0; i < 10; i++)
+                {*@
+            @foreach (var player in Players)
+            {
+
+                <tr>
+                    <td>@player.Firstname</td>
+                    <td>@player.Lastname</td>
+                    <td>@player.WonMatches</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}
+
+@code{
+
+    [Parameter]
+    public List<DartsMatchModel> AllMatches { get; set;}
+    [Parameter]
+    public DartsPlayerWin NewWinner { get; set; }
+    private List<DartsPlayerWin> Players = new();
+
+    protected override void OnInitialized()
+    {
+        foreach (var match in AllMatches)
+        {
+            CheckWinner(match);
+        }
+        Players = Players.OrderByDescending(p => p.WonMatches).ToList();
+    }
+
+    private void CheckWinner(DartsMatchModel match)
+    {
+        if (!match.IsActiveMatch)
+        {
+            var winningPlayer = match.PlayerTwo.Score > match.PlayerOne.Score ? match.PlayerTwo : match.PlayerOne;
+            var playerIsFound = Players.FirstOrDefault(p => p.Id == winningPlayer.Id);
+            if (playerIsFound != null) playerIsFound.WonMatches++;
+            else
+            {
+                var newWinningPlayer = new DartsPlayerWin
+                {
+                    Id = winningPlayer.Id,
+                    Firstname = winningPlayer.FirstName,
+                    Lastname = winningPlayer.LastName,
+                    WonMatches = 1
+                };
+                Players.Add(newWinningPlayer);
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if(NewWinner != null)
+        {
+            var foundPlayer = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
+            if (foundPlayer != null) foundPlayer.WonMatches++;
+            else Players.Add(NewWinner);
+            Players = Players.OrderByDescending(p => p.WonMatches)
+                             .ToList();
+        }
+    }
+}
