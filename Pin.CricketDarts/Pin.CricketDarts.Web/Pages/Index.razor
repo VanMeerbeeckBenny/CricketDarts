@@ -1,9 +1,24 @@
 ﻿@page "/"
+@inject NavigationManager navigation
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+<div class="d-flex justify-content-center">
+    <div class="mt-3">
+        <h1 class="header">Welcome to cricketDarts</h1>
+        <figure>
+            <img src="/images/dartBoard.png" />
+        </figure>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+        <NavLink class="btn btn-outline-primary btn-command-center" href="CommandCenter" Match="NavLinkMatch.All">
+            Presentator
+        </NavLink>
+
+        <NavLink class="btn btn-outline-primary btn-viewer" href="ViewerPage" Match="NavLinkMatch.All">
+            Spectator
+        </NavLink>
+
+
+    </div>
+</div>
