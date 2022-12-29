@@ -89,7 +89,7 @@
         if (result.IsSucces)
         {
 
-            var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Any()).ToList();
+            var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Select(m => m.Match.IsActiveGame).Contains(true)).ToList();
             maxPlayerCount = playerThatAreNotInMatch.Count();
 
             if (maxPlayerCount >= 2)
@@ -279,6 +279,17 @@
         await hubConnection.SendAsync("SendMatch", match);
     }
 
+    private async Task SendNewWinner(DartsPlayerModel player)
+    {
+
+        HubConnection hubConnection = new HubConnectionBuilder()
+            .WithUrl(navigation.ToAbsoluteUri("/Cricket-darts"))
+            .Build();
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("SendWinner", player);
+    }
+
     private async Task CloseGame(bool gameIsDone)
     {
         var winner = currentMatch.PlayerOne.Score > currentMatch.PlayerTwo.Score ? currentMatch.PlayerOne : currentMatch.PlayerTwo;
@@ -288,6 +299,7 @@
             gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!";
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
+            await SendNewWinner(winner);
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;
         }
