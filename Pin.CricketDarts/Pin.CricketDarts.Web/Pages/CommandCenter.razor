@@ -55,9 +55,29 @@
             </figure>
         </div>
     }
+<div class="d-flex align-items-center justify-content-center ">
+    <input type="button" class="btn btn-primary me-2" @onclick="RedirectToAddPlayer" value="+Add Player" />
+    <input type="button" class="btn btn-primary me-2" @onclick="CreateCurrentMatch" value="New Match" />
+    @if (activeGames.Any())
+    {
+    <EditForm Model="selectedMatch" OnValidSubmit="e => ActivateMatch(selectedMatch)" class="d-flex ml-4 justify-content-center p-2">
+      
+            <InputSelect class="form-select-sm" @bind-Value="@selectedMatch.Id">
+                <option value="@Guid.Empty" selected="selected">Pick a match</option>
+                @foreach (var match in activeGames)
+                {
+                    <option value="@match.Id">@match.PlayerOne.FirstName @match.PlayerOne.LastName - @match.PlayerTwo.FirstName @match.PlayerTwo.LastName</option>
+                }
+            </InputSelect>
+     
+                <input type="submit" class="btn btn-primary ms-1" value="Continue match">
+       
 
-    <input type="button" class="btn btn-primary me-2 mb-3" @onclick="RedirectToAddPlayer" value="+Add Player" />
-    <input type="button" class="btn btn-primary mb-3" @onclick="CreateCurrentMatch" value="New Match" />
+    </EditForm>
+    }
+</div>
+  
+    
 
 }
 
@@ -66,10 +86,12 @@
     private DartsMatchModel currentMatch;
     private List<ScoresPerNumberModel> allPosibleThrow;
     private List<ScoreModel> posibleBullThrows;
+    private List<DartsMatchModel> activeGames = new();
     DartsPlayerModel playerWhoFinischedFirst;
     private string error = "";
     private bool isBusyLoadingIndicator;
     private string gameIsDoneMessage = "";
+    private DartsMatchModel selectedMatch = new();
 
 
     private void RedirectToAddPlayer()
@@ -84,6 +106,7 @@
         posibleBullThrows = await _posibleThrowService.CreateAllBullThrows();
         if (allPosibleThrow == null || posibleBullThrows == null) error = "Something went wrong please restart!";
         isBusyLoadingIndicator = false;
+        await GetActiveGames();
 
     }
 
@@ -140,6 +163,7 @@
 
                         error = String.Empty;
                         gameIsDoneMessage = string.Empty;
+                        await GetActiveGames();
                         await _sigalRService.SendNewMatch(currentMatch);
 
                     }
@@ -161,7 +185,26 @@
             Id = p.Id,
             FirstName = p.Firstname,
             LastName = p.Lastname,
-            Throws = new List<ThrowModel>()
+            Throws = new List<ThrowModel>(),
+        }).ToList();
+    }
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players,Guid matchId)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = p.AllThrows
+            .Where(at => at.MatchId == matchId && at.PlayerId == p.Id)
+            .Select(at => new ThrowModel
+            {
+                BaseNumber = (int)at.Score.OriginalScore,
+                Throw = (int)at.Score.Score,
+                TimeStamp = at.TimeStamp,
+            }).ToList(),
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId)?.Score != null? p.Matches.FirstOrDefault(m => m.MatchId == matchId).Score:0,
         }).ToList();
     }
 
@@ -260,7 +303,7 @@
             }
             else await _sigalRService.SendNewThrow(currentMatch,score, player);
         }
-    }   
+    }
 
     private async Task CloseGame(bool gameIsDone)
     {
@@ -280,6 +323,7 @@
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
             await _sigalRService.SendNewWinner(winner);
+            await GetActiveGames();
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;
         }
@@ -312,6 +356,85 @@
         }
 
         return IsDone;
+    }
+    public async Task GetActiveGames()
+    {
+        activeGames = new();
+        var activeMatchesResult = await _matchService.GetActiveMatches();
+        if (activeMatchesResult.IsSucces)
+        {
+            foreach (var match in activeMatchesResult.Items)
+            {
+                var foundPlayersInMatch = match.PlayerMatch.Select(pm => pm.Player).ToList();
+                var players = ConvertToDartsPlayerModel(foundPlayersInMatch,match.Id);
+                var tempMatch = new DartsMatchModel
+                {
+                    Id = match.Id,
+                    IsActiveMatch = match.IsActiveGame,
+                    PlayerOne = players[0],
+                    PlayerTwo = players[1]
+                };
+                tempMatch.PlayerOne.FinischedNumbers = CreateFinischedNumbers(tempMatch.PlayerOne.Throws);
+                tempMatch.PlayerTwo.FinischedNumbers = CreateFinischedNumbers(tempMatch.PlayerTwo.Throws);
+                activeGames.Add(tempMatch);
+            }
+        }
+    }
+
+    private FinischedNumbersModel CreateFinischedNumbers(List<ThrowModel> throws)
+    {
+        var finischednumbers = new FinischedNumbersModel();
+
+        foreach (var prop in finischednumbers.GetType().GetProperties())
+        {
+            switch (prop.Name)
+            {
+                case "Fifteen":
+
+                    bool isDone = CheckIfNumberIsFinisched(throws, 15);
+                    if (isDone) finischednumbers.Fifteen = true
+                            ; break;
+                case "Sixteen":
+                    isDone = CheckIfNumberIsFinisched(throws, 16);
+                    if (isDone) finischednumbers.Sixteen = true
+                ; break;
+                case "Seventeen":
+                    isDone = CheckIfNumberIsFinisched(throws, 17);
+                    if (isDone) finischednumbers.Seventeen = true
+                ; break;
+                case "Eighteen":
+                    isDone = CheckIfNumberIsFinisched(throws, 18);
+                    if (isDone) finischednumbers.Eighteen = true
+                ; break;
+                case "NineTeen":
+                    isDone = CheckIfNumberIsFinisched(throws, 19);
+                    if (isDone) finischednumbers.NineTeen = true
+                ; break;
+                case "Twenty":
+                    isDone = CheckIfNumberIsFinisched(throws, 20);
+                    if (isDone) finischednumbers.Twenty = true
+                ; break;
+                case "Bull":
+                    isDone = CheckIfNumberIsFinisched(throws, 25);
+                    if (isDone) finischednumbers.Bull = true
+                ; break;
+            }
+        }
+        return finischednumbers;
+    }
+
+    private bool CheckIfNumberIsFinisched(List<ThrowModel> throws,int number)
+    {
+        var throwsOfNumber = throws.Where(t => t.BaseNumber == number).ToList();
+        var isDone = throwsOfNumber.Sum(ton => ton.Throw) / number >= 3;
+        return isDone;
+    }
+
+    public void ActivateMatch(DartsMatchModel selectedMatch)
+    {
+        error = string.Empty;
+        gameIsDoneMessage = string.Empty;
+        currentMatch = activeGames.FirstOrDefault(ag => ag.Id == selectedMatch.Id);
     }
 
 
