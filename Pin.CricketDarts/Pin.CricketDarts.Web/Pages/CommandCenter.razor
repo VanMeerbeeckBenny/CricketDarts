@@ -200,6 +200,8 @@
             .Where(at => at.MatchId == matchId && at.PlayerId == p.Id)
             .Select(at => new ThrowModel
             {
+                Id = at.Id,
+                MatchId = at.MatchId,
                 BaseNumber = (int)at.Score.OriginalScore,
                 Throw = (int)at.Score.Score,
                 TimeStamp = at.TimeStamp,
@@ -223,9 +225,12 @@
                 {
                     currentPlayer.Throws = getResult.Items.Select(t => new ThrowModel
                     {
+                        Id = t.Id,
                         BaseNumber = (int)t.Score.OriginalScore,
                         Throw = (int)t.Score.Score,
-                        TimeStamp = t.TimeStamp
+                        TimeStamp = t.TimeStamp,
+                        MatchId = t.MatchId
+                        
                     }).ToList();
                 }
                 await AddScore(currentPlayer, score);
