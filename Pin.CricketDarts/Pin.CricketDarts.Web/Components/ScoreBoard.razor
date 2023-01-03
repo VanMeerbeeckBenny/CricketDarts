@@ -1,4 +1,7 @@
-﻿<div class="d-flex justify-content-center">
+﻿@inject IPlayerThrowService _playerThrowService
+@inject ISignalRService _signalRService
+
+<div class="d-flex justify-content-center">
     <div class="d-flex flex-column w-75">
         <div class="d-flex flex-row w-100">
             <div class="playerOneSucces w-50 my-border-bottom">
@@ -23,20 +26,34 @@
             {
 
                 <div class="d-flex flex-row">
-                    <div class="playerOneSucces w-50">@CheckThrows(CurrentMatch.PlayerOne, number.Single)</div>
-                    <div class="number text-center">@number.Single.Score</div>
-                    <div class="playerTwoSucces w-50 ps-1">@CheckThrows(CurrentMatch.PlayerTwo, number.Single)</div>
-                </div>
+                    <div class="playerOneSucces w-50 d-flex justify-content-between align-items-center ps-2 pe-2"
+                         @onclick="e => RemoveScore(number,CurrentMatch.PlayerOne)">                       
+                            @CheckThrows(CurrentMatch.PlayerOne, number.Single)                    
+                    </div>
+                        <div class="number d-flex justify-content-center align-items-center">@number.Single.Score</div>
+
+                        <div class="playerTwoSucces w-50 d-flex justify-content-between align-items-center  pe-2 ps-2"
+                         @onclick="e => RemoveScore(number,CurrentMatch.PlayerTwo)">
+                            @CheckThrows(CurrentMatch.PlayerTwo, number.Single)
+                        </div>
+                    </div>
             }}
         <div class="d-flex flex-row">
-            <div class="playerOneSucces w-50">@CheckThrows(CurrentMatch.PlayerOne, PosibleBullThrows[0])</div>
-            <div class="number text-center">Bull</div>
-            <div class="playerTwoSucces w-50 ps-1">@CheckThrows(CurrentMatch.PlayerTwo, PosibleBullThrows[0])</div>
+            <div class="playerOneSucces w-50 d-flex justify-content-between align-items-center pe-2 ps-2"
+                         @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerOne)"> 
+                @CheckThrows(CurrentMatch.PlayerOne, PosibleBullThrows[0])
+            </div>
+            <div class="number d-flex justify-content-center align-items-center">Bull</div>
+            <div class="playerTwoSucces w-50 d-flex justify-content-between align-items-center pe-2 ps-2"
+                         @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerTwo)"> 
+                @CheckThrows(CurrentMatch.PlayerTwo, PosibleBullThrows[0])
+            </div>
         </div>
         <div class="mt-2 my-border-bottom"><h5>Score</h5></div>
         <div class="d-flex flex-row w-100 pb-2">
             <div class="w-50">@CurrentMatch.PlayerOne.Score</div>
             <div class="w-50 ps-5">@CurrentMatch.PlayerTwo.Score</div>
+            
         </div>
 
     </div>
@@ -82,9 +99,9 @@
             switch (amountOfHits)
             {
                 case 0: result = (MarkupString) "<span></span>"; break;
-                case 1: result = (MarkupString) "<i class=\"fas fa-slash\"></i>"; break;
-                case 2: result = (MarkupString) "<i class=\"fas fa-times ps-1\"></i>"; break;
-                default: result = (MarkupString)"<i class=\"far fa-times-circle\"></i>";break;
+                case 1: result = ShowButtons?(MarkupString)"<i class=\"fas fa-slash\"></i><i class=\"fas fa-times ps-1 red\"></div>": (MarkupString)"<i class=\"fas fa-slash\"></i>"; break;
+                case 2: result = ShowButtons ? (MarkupString)"<i class=\"fas fa-times ps-1\"></i> <i class=\"fas fa-times ps-1 red\">" : (MarkupString)"<i class=\"fas fa-times ps-1\"></i>"; break;
+                default: result = ShowButtons ? (MarkupString)"<i class=\"far fa-times-circle\"></i> <i class=\"fas fa-times ps-1 red\">": (MarkupString)"<i class=\"far fa-times-circle\"></i>"; break;
             }
         }
 
@@ -92,7 +109,55 @@
 
     }
 
+    public async Task RemoveScore(ScoresPerNumberModel score,DartsPlayerModel player)
+    {
+        var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
+                                                  t.BaseNumber == score.Single.BaseScore).ToList();
 
+        if(foundScores.Any())
+        {
+            foreach (var foundScore in foundScores)
+            {
+                var result =  await _playerThrowService.DeleteAsync(foundScore.Id);
+
+                player.Throws.Remove(foundScore);
+                SetFinischGamePropertie(player, score.Name);
+
+            }
+
+            await _signalRService.SendRemoveThrow(foundScores.First(),player);
+        }
+    }
+
+    public async Task RemoveScore(ScoreModel score, DartsPlayerModel player)
+    {
+        var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
+                                                  t.BaseNumber == score.BaseScore).ToList();
+
+        if (foundScores.Any())
+        {
+            foreach (var foundScore in foundScores)
+            {
+                var result = await _playerThrowService.DeleteAsync(foundScore.Id);
+
+                player.Throws.Remove(foundScore);
+                SetFinischGamePropertie(player, score.Name);
+            }
+
+            await _signalRService.SendRemoveThrow(foundScores.First(), player);
+        }
+    }
+
+    private void SetFinischGamePropertie(DartsPlayerModel player,string scoreName)
+    {
+        foreach (var item in player.FinischedNumbers.GetType().GetProperties())
+        {
+            if (scoreName.Contains(item.Name))
+            {
+                item.SetValue(player.FinischedNumbers, false);
+            }
+        }
+    }
 
 
 
