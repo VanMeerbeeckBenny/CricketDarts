@@ -9,5 +9,6 @@ namespace Pin.CricketDarts.Web.Interfaces
         Task SendNewThrow(DartsMatchModel currentMatch, ScoreModel score, DartsPlayerModel player, bool gameIsDone = false);
         Task SendNewMatch(DartsMatchModel match);
         Task SendNewWinner(DartsPlayerModel player);
+        Task SendRemoveThrow(ThrowModel playerThrow, DartsPlayerModel player);
     }
 }
