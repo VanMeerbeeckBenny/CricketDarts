@@ -99,6 +99,25 @@
 
         });
 
+        hubConnection.On<SignalRThrowModel>("SendRemoveThrow", (throwToRemove) =>
+        {
+
+            var foundMatch = currentMatches.FirstOrDefault(m => m.Id == throwToRemove.MatchId);
+            if (foundMatch != null)
+            {
+                var dartsPlayer = foundMatch.PlayerOne.Id == throwToRemove.PlayerId ? foundMatch.PlayerOne : foundMatch.PlayerTwo;
+                var foundThrows = dartsPlayer.Throws.Where(t => t.BaseNumber == throwToRemove.Throw.BaseNumber).ToList();
+                foreach (var playerThrow in foundThrows)
+                {
+                    dartsPlayer.Throws.Remove(playerThrow);
+                }                            
+            
+                InvokeAsync(StateHasChanged);
+
+            }
+
+        });
+
         hubConnection.On<DartsMatchModel>("SendMatch", (match) =>
         {
 
