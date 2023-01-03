@@ -44,5 +44,17 @@ namespace Pin.CricketDarts.Core.Services
 
             return new ItemResultModel<PlayerThrow> { IsSucces = true,Items = playerThrows };
         }
+
+        public async Task<ItemResultModel<PlayerThrow>> DeleteAsync(Guid id)
+        {
+            var foundThrow = await _playerThrowRepository.GetByIdAsync(id);
+
+            if (foundThrow == null)
+                return new ItemResultModel<PlayerThrow> { ErrorMessage = "Nothing to show!" };
+
+            bool isSucces = await _playerThrowRepository.DeleteAsync(foundThrow);
+            return new ItemResultModel<PlayerThrow> { IsSucces = isSucces };
+        }
+
     }
 }
