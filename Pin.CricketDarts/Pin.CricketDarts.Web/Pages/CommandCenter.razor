@@ -39,45 +39,57 @@
             </div>
         </div>
     }
-    @if (currentMatch != null && string.IsNullOrWhiteSpace(error))
+    if (DeleteIsBusy)
     {
-        <div class="d-flex justify-content-center">
-            <figure class="d-flex align-items-center justify-content-center">
-                <img src="/images/darts.png" />
-            </figure>
-            <div class="w-100">
-                <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                            PosibleBullThrows="posibleBullThrows"
-                            CurrentMatch="currentMatch"></ScoreBoard>
+        <div class="d-flex justify-content-center align-items-center flex-column delete-spinner">
+            <div class="spinner-border text-danger" role="status">
             </div>
-            <figure class="d-flex align-items-center justify-content-center">
-                <img src="/images/darts.png" />
-            </figure>
+            <span>Loading...</span>
         </div>
     }
-<div class="d-flex align-items-center justify-content-center ">
-    <input type="button" class="btn btn-primary me-2" @onclick="RedirectToAddPlayer" value="+Add Player" />
-    <input type="button" class="btn btn-primary me-2" @onclick="CreateCurrentMatch" value="New Match" />
-    @if (activeGames.Any())
+    else
     {
-    <EditForm Model="selectedMatch" OnValidSubmit="e => ActivateMatch(selectedMatch)" class="d-flex ml-4 justify-content-center p-2">
-      
-            <InputSelect class="form-select-sm" @bind-Value="@selectedMatch.Id">
-                <option value="@Guid.Empty" selected="selected">Pick a match</option>
-                @foreach (var match in activeGames)
-                {
-                    <option value="@match.Id">@match.PlayerOne.FirstName @match.PlayerOne.LastName - @match.PlayerTwo.FirstName @match.PlayerTwo.LastName</option>
-                }
-            </InputSelect>
-     
-                <input type="submit" class="btn btn-primary ms-1" value="Continue match">
-       
+        @if (currentMatch != null && string.IsNullOrWhiteSpace(error))
+        {
+            <div class="d-flex justify-content-center">
+                <figure class="d-flex align-items-center justify-content-center">
+                    <img src="/images/darts.png" />
+                </figure>
+                <div class="w-100">
+                    <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                                PosibleBullThrows="posibleBullThrows"
+                                CurrentMatch="currentMatch"
+                                isBusy="SetSpinner"></ScoreBoard>
+                </div>
+                <figure class="d-flex align-items-center justify-content-center">
+                    <img src="/images/darts.png" />
+                </figure>
+            </div>
+        }
+        <div class="d-flex align-items-center justify-content-center ">
+            <input type="button" class="btn btn-primary me-2" @onclick="RedirectToAddPlayer" value="+Add Player" />
+            <input type="button" class="btn btn-primary me-2" @onclick="CreateCurrentMatch" value="New Match" />
+            @if (activeGames.Any())
+            {
+                <EditForm Model="selectedMatch" OnValidSubmit="e => ActivateMatch(selectedMatch)" class="d-flex ml-4 justify-content-center p-2">
 
-    </EditForm>
+                    <InputSelect class="form-select-sm" @bind-Value="@selectedMatch.Id">
+                        <option value="@Guid.Empty" selected="selected">Pick a match</option>
+                        @foreach (var match in activeGames)
+                        {
+                            <option value="@match.Id">@match.PlayerOne.FirstName @match.PlayerOne.LastName - @match.PlayerTwo.FirstName @match.PlayerTwo.LastName</option>
+                        }
+                    </InputSelect>
+
+                    <input type="submit" class="btn btn-primary ms-1" value="Continue match">
+
+
+                </EditForm>
+            }
+        </div>
     }
-</div>
-  
-    
+
+
 
 }
 
@@ -89,16 +101,21 @@
     private List<DartsMatchModel> activeGames = new();
     DartsPlayerModel playerWhoFinischedFirst;
     private string error = "";
-    private bool isBusyLoadingIndicator;
+    private bool isBusyLoadingIndicator = true;
     private string gameIsDoneMessage = "";
     private DartsMatchModel selectedMatch = new();
+    private bool DeleteIsBusy;
 
 
     private void RedirectToAddPlayer()
     {
         navigation.NavigateTo("/AddPlayer");
     }
-
+    private async Task SetSpinner(bool isBusy)
+    {
+        DeleteIsBusy = isBusy;
+        await InvokeAsync(StateHasChanged);
+    }
     protected async override Task OnInitializedAsync()
     {
         isBusyLoadingIndicator = true;
@@ -189,7 +206,7 @@
         }).ToList();
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players,Guid matchId)
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
     {
         return players.Select(p => new DartsPlayerModel
         {
@@ -206,7 +223,7 @@
                 Throw = (int)at.Score.Score,
                 TimeStamp = at.TimeStamp,
             }).ToList(),
-            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId)?.Score != null? p.Matches.FirstOrDefault(m => m.MatchId == matchId).Score:0,
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId)?.Score != null ? p.Matches.FirstOrDefault(m => m.MatchId == matchId).Score : 0,
         }).ToList();
     }
 
@@ -230,7 +247,7 @@
                         Throw = (int)t.Score.Score,
                         TimeStamp = t.TimeStamp,
                         MatchId = t.MatchId
-                        
+
                     }).ToList();
                 }
                 await AddScore(currentPlayer, score);
@@ -302,11 +319,12 @@
                 }
             }
             var gameIsDone = CheckGameIsDone(player);
-            if (gameIsDone) {
-                await _sigalRService.SendNewThrow(currentMatch,score, player,true);
+            if (gameIsDone)
+            {
+                await _sigalRService.SendNewThrow(currentMatch, score, player, true);
                 await CloseGame(gameIsDone);
             }
-            else await _sigalRService.SendNewThrow(currentMatch,score, player);
+            else await _sigalRService.SendNewThrow(currentMatch, score, player);
         }
     }
 
@@ -327,10 +345,19 @@
             if (isSame) gameIsDoneMessage += $"{winner.FirstName}-{winner.LastName} has finisched the game first!!";
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
-            await _sigalRService.SendNewWinner(winner);
             await GetActiveGames();
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;
+            var winModel = new DartsPlayerWinModel
+            {
+                Id = winner.Id,
+                Firstname = winner.FirstName,
+                Lastname = winner.LastName,
+                WonMatches = 1,
+                CurrentScore = winner.Score,
+                Loser = loser
+            };
+            await _sigalRService.SendNewWinner(winModel);
         }
     }
 
@@ -340,7 +367,7 @@
         DartsPlayerModel opponent = currentMatch.PlayerOne == player ? currentMatch.PlayerTwo : currentMatch.PlayerOne;
         bool playerIsFinisched = CheckPlayerIsDone(player);
         bool opponentIsFinisched = CheckPlayerIsDone(opponent);
-        if(playerIsFinisched != opponentIsFinisched)
+        if (playerIsFinisched != opponentIsFinisched)
         {
             playerWhoFinischedFirst = playerIsFinisched ? player : opponent;
         }
@@ -371,7 +398,7 @@
             foreach (var match in activeMatchesResult.Items)
             {
                 var foundPlayersInMatch = match.PlayerMatch.Select(pm => pm.Player).ToList();
-                var players = ConvertToDartsPlayerModel(foundPlayersInMatch,match.Id);
+                var players = ConvertToDartsPlayerModel(foundPlayersInMatch, match.Id);
                 var tempMatch = new DartsMatchModel
                 {
                     Id = match.Id,
@@ -428,7 +455,7 @@
         return finischednumbers;
     }
 
-    private bool CheckIfNumberIsFinisched(List<ThrowModel> throws,int number)
+    private bool CheckIfNumberIsFinisched(List<ThrowModel> throws, int number)
     {
         var throwsOfNumber = throws.Where(t => t.BaseNumber == number).ToList();
         var isDone = throwsOfNumber.Sum(ton => ton.Throw) / number >= 3;
