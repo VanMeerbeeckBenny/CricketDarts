@@ -16,14 +16,15 @@
      
             @foreach (var player in Players)
             {
-
+                if (player.WonMatches > 0)
+                {
                 <tr>
-                    <td>@(Players.IndexOf(player)+1)) @player.Firstname</td>
+                    <td>@(Players.IndexOf(player) + 1)) @player.Firstname</td>
                     <td>@player.Lastname</td>
                     <td>@player.WonMatches</td>                  
                     <td>@player.AverageScore</td>                
                 </tr>
-
+                }
             }
         </tbody>
     </table>
@@ -39,17 +40,21 @@
 
     protected async override Task OnInitializedAsync()
     {
-        foreach (var match in AllMatches)
+        foreach (var match in AllMatches.Where(am => !am.IsActiveMatch))
         {
-            await CheckWinner(match);
+            CheckWinner(match);
+        }
+        foreach (var player in Players)
+        {
+            player.AverageScore = await CalculatePlayerAverageScore(player.Id);
         }
         Players = Players.OrderByDescending(p => p.WonMatches)
-                         .ThenByDescending(p => p.AverageScore)
-                         .ToList();
+                     .ThenByDescending(p => p.AverageScore)
+                     .ToList();
     }
 
 
-    private async Task CheckWinner(DartsMatchModel match)
+    private void CheckWinner(DartsMatchModel match)
     {
         if (!match.IsActiveMatch)
         {
@@ -57,8 +62,9 @@
             var playerIsFound = Players.FirstOrDefault(p => p.Id == winningPlayer.Id);
             if (playerIsFound != null)
             {
+                playerIsFound.AllScores.Add(winningPlayer.Score);
                 playerIsFound.WonMatches++;
-                playerIsFound.AverageScore = await CalculatePlayerAverageScore(winningPlayer.Id);
+
             }
             else
             {
@@ -68,27 +74,51 @@
                     Firstname = winningPlayer.FirstName,
                     Lastname = winningPlayer.LastName,
                     WonMatches = 1,
-                    AverageScore = await CalculatePlayerAverageScore(winningPlayer.Id)
+
                 };
+                newWinningPlayer.AllScores.Add(winningPlayer.Score);
                 Players.Add(newWinningPlayer);
             }
         }
     }
-
-    protected async override Task OnParametersSetAsync()
+   
+    protected override void OnParametersSet()
     {
         base.OnParametersSet();
         if(NewWinner != null)
         {
-            var foundPlayer = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
-            if (foundPlayer != null)         
-                foundPlayer.WonMatches++;            
-            else            
+            var foundWinner = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
+            var foundLoser = Players.FirstOrDefault(p => p.Id == NewWinner.Loser.Id);
+            if (foundWinner != null)
+            {
+                foundWinner.WonMatches++;
+                foundWinner.AllScores.Add(NewWinner.CurrentScore);
+            }
+            else
+            {
+                NewWinner.AllScores.Add(NewWinner.CurrentScore);
                 Players.Add(NewWinner);
-            
+            }
+
+            if (foundLoser != null)
+                foundLoser.AllScores.Add(NewWinner.Loser.Score);
+            else
+            {
+                var loser = new DartsPlayerWinModel
+                {
+                    Id = NewWinner.Loser.Id,
+                    Firstname = NewWinner.Loser.FirstName,
+                    Lastname = NewWinner.Loser.LastName,
+                    AverageScore = NewWinner.Loser.Score,
+                    AllScores = new List<int> { NewWinner.Loser.Score },
+                };
+                Players.Add(loser);
+            }
+
+
             foreach (var player in Players)
             {
-                player.AverageScore = await CalculatePlayerAverageScore(player.Id);
+                player.AverageScore = CalculatePlayerAverageScore(player);
             }
             Players = Players.OrderByDescending(p => p.WonMatches)
                              .ThenByDescending(p => p.AverageScore)
@@ -98,15 +128,25 @@
 
     private async Task<int> CalculatePlayerAverageScore(Guid id)
     {
-        var result =await _playerService.GetPlayerByIdAsync(id);
+        var result =await _playerService.GetPlayerByIdAsync(id);//Database works realybad when signalR is triggered
         if(result.IsSucces)
         {
             var player = result.Items.FirstOrDefault();
-            List<int> scores = player.Matches.Where(m => !m.Match.IsActiveGame)
-                                            .Select(m => m.Score).ToList();
+            List<int> scores = player.Matches.Select(m => m.Score).ToList();
             int averageScore = scores.Any() ?(int)scores.Average() : 0;
             return averageScore;
         }
         return 0;
     }
+
+
+    private int CalculatePlayerAverageScore(DartsPlayerWinModel player)//thats why i made this
+    {
+        player.AverageScore = player.AllScores.Any() ? (int)Math.Round(player.AllScores.Average()):0;
+        return player.AverageScore;
+    }
+
+
+
+
 }
