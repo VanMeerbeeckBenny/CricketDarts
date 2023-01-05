@@ -213,3 +213,14 @@ font-weight:bolder;
 .red{
     color:red;
 }
+
+.delete-spinner{
+    height:50vh;
+}
+table{
+    font-weight:bold;
+}
+
+thead{
+    color:red;
+}
