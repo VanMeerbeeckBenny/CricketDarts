@@ -2,52 +2,53 @@
 @inject IMatchService _matchService
 @inject IPlayerService _playerService
 @inject IPosibleThrowService _posibleThrowService
+@inject IPlayerThrowService _playerThrowService
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.SignalR.Client
 <div class="viewer"></div>
-    <div class="d-flex pt-3">
+<div class="d-flex pt-3">
 
-        <div class="d-flex flex-wrap w-50">
-            @if (currentMatches != null && currentMatches.Any())
-            {
-                @foreach (var match in currentMatches)
-                {
-                    <div class="mb-3">
-                        <ScoreBoard AllPosibleThrow="allPosibleThrow"
-                                    PosibleBullThrows="posibleBullThrows"
-                                    CurrentMatch="match"
-                                    ShowButtons="false"></ScoreBoard>
-                    </div>
-                }
-
-            }
-        </div>
-        @if (allPlayers != null && allPlayers.Any())
+    <div class="d-flex flex-wrap w-50">
+        @if (currentMatches != null && currentMatches.Any())
         {
-            <div class="w-50">
-                <div class="mb-4">
-                    <TopStats newThrow="newThrow"
-                              Devider="2"
-                              allPlayers="allPlayers"
-                              Title="Top Double"></TopStats>
+            @foreach (var match in currentMatches)
+            {
+                <div class="mb-3">
+                    <ScoreBoard AllPosibleThrow="allPosibleThrow"
+                                PosibleBullThrows="posibleBullThrows"
+                                CurrentMatch="match"
+                                ShowButtons="false"></ScoreBoard>
                 </div>
-                <div>
-                    <TopStats newThrow="newThrow"
-                              Devider="3"
-                              allPlayers="allPlayers"
-                              Title="Top Triple"></TopStats>
-                </div>
-                <div>
-                    <TopWonGames AllMatches="allMatches"
-                                 NewWinner="newWinner">
+            }
 
-                    </TopWonGames>
-                </div>
-            </div>
         }
-
     </div>
+    @if (allPlayers != null && allPlayers.Any())
+    {
+        <div class="w-50">
+            <div class="mb-4">
+                <TopStats newThrow="newThrow"
+                          Devider="2"
+                          allPlayers="allPlayers"
+                          Title="Top Double"></TopStats>
+            </div>
+            <div>
+                <TopStats newThrow="newThrow"
+                          Devider="3"
+                          allPlayers="allPlayers"
+                          Title="Top Triple"></TopStats>
+            </div>
+            <div>
+                <TopWonGames AllMatches="allMatches"
+                             NewWinner="newWinner">
+
+                </TopWonGames>
+            </div>
+        </div>
+    }
+
+</div>
 
 @code {
     private List<ScoresPerNumberModel> allPosibleThrow;
@@ -79,27 +80,32 @@
 
         await hubConnection.StartAsync();
 
-        hubConnection.On<SignalRThrowModel>("SendThrow", (gameFact) =>
+        hubConnection.On<SignalRThrowModel>("SendThrow", async (gameFact) =>
         {
 
             var foundMatch = currentMatches.FirstOrDefault(m => m.Id == gameFact.MatchId);
+
             if (foundMatch != null)
             {
                 var dartsPlayer = foundMatch.PlayerOne.Id == gameFact.PlayerId ? foundMatch.PlayerOne : foundMatch.PlayerTwo;
                 dartsPlayer.Throws.Add(gameFact.Throw);
+                var foundplayer = allPlayers.FirstOrDefault(ap => ap.Id == dartsPlayer.Id);
+
+                // need to add them here so all stats works;
+                foundplayer.Throws.Add(gameFact.Throw);
                 dartsPlayer.Score = gameFact.CurrentScore;
                 if (gameFact.IsDone)
                 {
                     currentMatches.Remove(foundMatch);
                 }
                 newThrow = gameFact;
-                InvokeAsync(StateHasChanged);
+                await InvokeAsync(StateHasChanged);
 
             }
 
         });
 
-        hubConnection.On<SignalRThrowModel>("SendRemoveThrow", (throwToRemove) =>
+        hubConnection.On<SignalRThrowModel>("SendRemoveThrow", async (throwToRemove) =>
         {
 
             var foundMatch = currentMatches.FirstOrDefault(m => m.Id == throwToRemove.MatchId);
@@ -110,15 +116,14 @@
                 foreach (var playerThrow in foundThrows)
                 {
                     dartsPlayer.Throws.Remove(playerThrow);
-                }                            
-            
-                InvokeAsync(StateHasChanged);
+                }
+                await InvokeAsync(StateHasChanged);
 
             }
 
         });
 
-        hubConnection.On<DartsMatchModel>("SendMatch", (match) =>
+        hubConnection.On<DartsMatchModel>("SendMatch",async (match) =>
         {
 
             var foundMatch = currentMatches.FirstOrDefault(m => m.Id == match.Id);
@@ -129,25 +134,40 @@
 
             }
             else currentMatches.Remove(foundMatch);
-            InvokeAsync(StateHasChanged);
+            allPlayers = await GetAllPlayers();
+            await InvokeAsync(StateHasChanged);
 
         });
 
-        hubConnection.On<DartsPlayerModel>("SendWinner", async(player) =>
-        {
+        hubConnection.On<SignalRThrowModel>("SendRemoveStat", async (playerThrow) =>
+        {           
 
-            var newWinningPlayer = new DartsPlayerWinModel
+            foreach (var player in allPlayers)
             {
-                Id = player.Id,
-                Firstname = player.FirstName,
-                Lastname = player.LastName,
-                WonMatches = 1
-            };
-            newWinner = newWinningPlayer;
+                if(player.Id == playerThrow.PlayerId)
+                {
+                    var throws = player.Throws.Where(t => t.MatchId == playerThrow.MatchId).ToList();
+                    foreach (var throwOfUser in throws)
+                    {
+                       if(throwOfUser.BaseNumber == playerThrow.Throw.BaseNumber)
+                            player.Throws.Remove(throwOfUser);
+                        
+                    }
+                }
+
+            }           
+
+            await InvokeAsync(StateHasChanged);
+          
+        });
+
+        hubConnection.On<DartsPlayerWinModel>("SendWinner", async (winModel) =>
+        {
+            newWinner = winModel;
             await InvokeAsync(StateHasChanged);
             newWinner = null;
-
         });
+
     }
 
     private async Task<List<DartsPlayerModel>> GetAllPlayers() //Couldent use this inside topstats component as it would have issues in treathing.
@@ -156,18 +176,22 @@
         var allPlayersResult = await _playerService.GetAllPlayersAsync();
         if (allPlayersResult.IsSucces)
         {
-            return allPlayersResult.Items.Select(p => new DartsPlayerModel
+            var allplayer = allPlayersResult.Items.Select(p => new DartsPlayerModel
             {
                 Id = p.Id,
                 FirstName = p.Firstname,
                 LastName = p.Lastname,
                 Throws = p?.AllThrows.Select(at => new ThrowModel
                 {
+                    Id = at.Id,
                     BaseNumber = (int)at.Score.OriginalScore,
                     Throw = (int)at.Score.Score,
-                    TimeStamp = at.TimeStamp
+                    TimeStamp = at.TimeStamp,
+                    MatchId = at.MatchId
                 }).ToList() ?? new List<ThrowModel>()
             }).ToList();
+
+            return allplayer;
         }
         else return null;
     }
