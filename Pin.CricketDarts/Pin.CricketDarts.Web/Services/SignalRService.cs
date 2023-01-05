@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Pin.CricketDarts.Web.Models;
 using Microsoft.AspNetCore.Components;
 using Pin.CricketDarts.Web.Interfaces;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Pin.CricketDarts.Web.Services
 {
@@ -20,6 +21,7 @@ namespace Pin.CricketDarts.Web.Services
             {
                 Throw = new ThrowModel
                 {
+                    Id = player.Throws.OrderByDescending(t => t.TimeStamp).FirstOrDefault().Id,
                     BaseNumber = score.BaseScore,
                     Throw = score.Score,
                     TimeStamp = DateTime.Now,
@@ -45,6 +47,7 @@ namespace Pin.CricketDarts.Web.Services
             {
                 Throw = new ThrowModel
                 {
+                    Id = playerThrow.Id,
                     BaseNumber = playerThrow.BaseNumber,
                     Throw = playerThrow.Throw,
                     TimeStamp = DateTime.Now,
@@ -75,18 +78,31 @@ namespace Pin.CricketDarts.Web.Services
             await hubConnection.SendAsync("SendMatch", match);
         }
 
-        public async Task SendRemoveStat(ThrowModel throwModel)
+        public async Task SendRemoveStat(ThrowModel throwModel, DartsPlayerModel player)
         {
-
+            var signalrThrowModel = new SignalRThrowModel
+            {
+                Throw = new ThrowModel
+                {
+                    Id = throwModel.Id,
+                    BaseNumber = throwModel.BaseNumber,
+                    Throw = throwModel.Throw,
+                    TimeStamp = DateTime.Now,
+                    MatchId = throwModel.MatchId
+                },
+                CurrentScore = player.Score,
+                MatchId = throwModel.MatchId,
+                PlayerId = player.Id,                
+            };
             HubConnection hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/Cricket-darts"))
                 .Build();
 
             await hubConnection.StartAsync();
-            await hubConnection.SendAsync("SendRemoveStat", throwModel);
+            await hubConnection.SendAsync("SendRemoveStat", signalrThrowModel);
         }
 
-        public async Task SendNewWinner(DartsPlayerModel player)
+        public async Task SendNewWinner(DartsPlayerWinModel player)
         {
 
             HubConnection hubConnection = new HubConnectionBuilder()
