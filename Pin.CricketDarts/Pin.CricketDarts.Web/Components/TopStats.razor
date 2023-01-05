@@ -1,4 +1,8 @@
-﻿@inject IPlayerService _playerService
+﻿@inject IPlayerThrowService _playerThrowService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.SignalR.Client
+
 
 @if (filteredTopPlayers != null && filteredTopPlayers.Any())
 {
@@ -11,59 +15,68 @@
                 <th>Amount</th>
             </tr>
         </thead>
-        <tbody>       
+        <tbody>
             @foreach (var player in filteredTopPlayers)
             {
-              
+
                 <tr>
                     <td>@(filteredTopPlayers.IndexOf(player)+1)) @player.Firstname</td>
                     <td>@player.Lastname</td>
                     <td>@player.CountOfThrows</td>
                 </tr>
-                
+
             }
         </tbody>
     </table>
 }
 @code {
-        [Parameter]
-        public SignalRThrowModel newThrow { get; set; }
-        [Parameter]
-        public int Devider { get; set; }
+    [Parameter]
+    public SignalRThrowModel newThrow { get; set; }
+    [Parameter]
+    public int Devider { get; set; }
     private List<TopScoreModel> topPlayers;
     private List<TopScoreModel> filteredTopPlayers;
     [Parameter]
     public List<DartsPlayerModel> allPlayers { get; set; }
     [Parameter]
     public string Title { get; set; }
+    private HubConnection hubConnection;
+    private SignalRThrowModel PreviusThrow;
 
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
-        topPlayers = CreateTopPlayers(allPlayers);
+        topPlayers = CreateTopPlayers(allPlayers);       
     }
 
     protected override void OnParametersSet()
     {
-        if (newThrow != null)
+        if (newThrow != null && newThrow != PreviusThrow)
         {
             var foundPlayer = topPlayers.FirstOrDefault(t => t.PlayerId == newThrow.PlayerId);
             if (foundPlayer != null)
             {
                 if (newThrow.Throw.Throw / newThrow.Throw.BaseNumber == Devider) foundPlayer.CountOfThrows += 1;
+                PreviusThrow = newThrow;
             }
 
+            if (topPlayers != null)
+            {
+                filteredTopPlayers = topPlayers.OrderByDescending(tp => tp.CountOfThrows)
+                                       .Where(tp => tp.CountOfThrows > 0)
+                                       .Take(5)
+                                       .ToList();
+            }
         }
-        if (topPlayers != null)
+        else
         {
+            topPlayers = CreateTopPlayers(allPlayers);
             filteredTopPlayers = topPlayers.OrderByDescending(tp => tp.CountOfThrows)
-                                   .Where(tp => tp.CountOfThrows > 0)
-                                   .Take(5)
-                                   .ToList();
+                                    .Where(tp => tp.CountOfThrows > 0)
+                                    .Take(5)
+                                    .ToList();
         }
     }
-
-
 
     private List<TopScoreModel> CreateTopPlayers(List<DartsPlayerModel> allPlayers)
     {
@@ -79,4 +92,6 @@
     .OrderByDescending(t => t.CountOfThrows)
     .ToList();
     }
+
+
 }
