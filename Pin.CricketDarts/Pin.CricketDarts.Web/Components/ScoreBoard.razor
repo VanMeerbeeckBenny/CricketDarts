@@ -1,6 +1,6 @@
 ﻿@inject IPlayerThrowService _playerThrowService
 @inject ISignalRService _signalRService
-
+         
 <div class="d-flex justify-content-center">
     <div class="d-flex flex-column w-75">
         <div class="d-flex flex-row w-100">
@@ -10,7 +10,7 @@
                 {
                     <input type="button" class="btn btn-primary ms-1" value="Set player as active" @onclick="e => SetActivePlayer(CurrentMatch.PlayerOne)" />
                 }
-                </div>
+            </div>
             <div class="number-empty my-border-bottom"></div>
             <div class="playerTwoSucces w-50 ps-2 my-border-bottom">
                 <span>@CurrentMatch.PlayerTwo.FirstName @CurrentMatch.PlayerTwo.LastName</span>
@@ -27,25 +27,25 @@
 
                 <div class="d-flex flex-row">
                     <div class="playerOneSucces w-50 d-flex justify-content-between align-items-center ps-2 pe-2"
-                         @onclick="e => RemoveScore(number,CurrentMatch.PlayerOne)">                       
-                            @CheckThrows(CurrentMatch.PlayerOne, number.Single)                    
+                         @onclick="e => RemoveScore(number,CurrentMatch.PlayerOne)">
+                        @CheckThrows(CurrentMatch.PlayerOne, number.Single)
                     </div>
-                        <div class="number d-flex justify-content-center align-items-center">@number.Single.Score</div>
+                    <div class="number d-flex justify-content-center align-items-center">@number.Single.Score</div>
 
-                        <div class="playerTwoSucces w-50 d-flex justify-content-between align-items-center  pe-2 ps-2"
+                    <div class="playerTwoSucces w-50 d-flex justify-content-between align-items-center  pe-2 ps-2"
                          @onclick="e => RemoveScore(number,CurrentMatch.PlayerTwo)">
-                            @CheckThrows(CurrentMatch.PlayerTwo, number.Single)
-                        </div>
+                        @CheckThrows(CurrentMatch.PlayerTwo, number.Single)
                     </div>
+                </div>
             }}
         <div class="d-flex flex-row">
             <div class="playerOneSucces w-50 d-flex justify-content-between align-items-center pe-2 ps-2"
-                         @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerOne)"> 
+                 @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerOne)">
                 @CheckThrows(CurrentMatch.PlayerOne, PosibleBullThrows[0])
             </div>
             <div class="number d-flex justify-content-center align-items-center">Bull</div>
             <div class="playerTwoSucces w-50 d-flex justify-content-between align-items-center pe-2 ps-2"
-                         @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerTwo)"> 
+                 @onclick="e => RemoveScore(PosibleBullThrows[0],CurrentMatch.PlayerTwo)">
                 @CheckThrows(CurrentMatch.PlayerTwo, PosibleBullThrows[0])
             </div>
         </div>
@@ -53,7 +53,7 @@
         <div class="d-flex flex-row w-100 pb-2">
             <div class="w-50">@CurrentMatch.PlayerOne.Score</div>
             <div class="w-50 ps-5">@CurrentMatch.PlayerTwo.Score</div>
-            
+
         </div>
 
     </div>
@@ -61,14 +61,16 @@
 
 
 @code {
-    [Parameter]
-    public DartsMatchModel CurrentMatch { get; set; }
-    [Parameter]
-    public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
-    [Parameter]
-    public List<ScoreModel> PosibleBullThrows { get; set; }
-    [Parameter]
-    public bool ShowButtons { get; set; } = true;
+        [Parameter]
+        public DartsMatchModel CurrentMatch { get; set; }
+        [Parameter]
+        public List<ScoresPerNumberModel> AllPosibleThrow { get; set; }
+        [Parameter]
+        public List<ScoreModel> PosibleBullThrows { get; set; }
+        [Parameter]
+        public bool ShowButtons { get; set; } = true;
+        [Parameter]
+        public EventCallback<bool> isBusy { get; set; }
 
 
     protected override void OnParametersSet()
@@ -79,12 +81,12 @@
     private void SetActivePlayer(DartsPlayerModel playerToBeActive)
     {
         playerToBeActive.IsActiveTurn = true;
-        var playerToBeDeactivated = CurrentMatch.PlayerOne == playerToBeActive ?  CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
+        var playerToBeDeactivated = CurrentMatch.PlayerOne == playerToBeActive ? CurrentMatch.PlayerTwo : CurrentMatch.PlayerOne;
         playerToBeDeactivated.IsActiveTurn = false;
 
     }
 
-    private MarkupString CheckThrows(DartsPlayerModel player,ScoreModel number)
+    private MarkupString CheckThrows(DartsPlayerModel player, ScoreModel number)
     {
         var allThrowsOfPlayer = player.Throws.OrderBy(t => t.TimeStamp).ToList();
         var amountOfHits = 0;
@@ -98,10 +100,10 @@
 
             switch (amountOfHits)
             {
-                case 0: result = (MarkupString) "<span></span>"; break;
-                case 1: result = ShowButtons?(MarkupString)"<i class=\"fas fa-slash\"></i><i class=\"fas fa-times ps-1 red\"></div>": (MarkupString)"<i class=\"fas fa-slash\"></i>"; break;
+                case 0: result = (MarkupString)"<span></span>"; break;
+                case 1: result = ShowButtons ? (MarkupString)"<i class=\"fas fa-slash\"></i><i class=\"fas fa-times ps-1 red\"></div>" : (MarkupString)"<i class=\"fas fa-slash\"></i>"; break;
                 case 2: result = ShowButtons ? (MarkupString)"<i class=\"fas fa-times ps-1\"></i> <i class=\"fas fa-times ps-1 red\">" : (MarkupString)"<i class=\"fas fa-times ps-1\"></i>"; break;
-                default: result = ShowButtons ? (MarkupString)"<i class=\"far fa-times-circle\"></i> <i class=\"fas fa-times ps-1 red\">": (MarkupString)"<i class=\"far fa-times-circle\"></i>"; break;
+                default: result = ShowButtons ? (MarkupString)"<i class=\"far fa-times-circle\"></i> <i class=\"fas fa-times ps-1 red\">" : (MarkupString)"<i class=\"far fa-times-circle\"></i>"; break;
             }
         }
 
@@ -109,46 +111,69 @@
 
     }
 
-    public async Task RemoveScore(ScoresPerNumberModel score,DartsPlayerModel player)
+    public async Task RemoveScore(ScoresPerNumberModel score, DartsPlayerModel player)
     {
         var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
-                                                  t.BaseNumber == score.Single.BaseScore).ToList();
+                                                  t.BaseNumber == score.Single.BaseScore)
+                                        .OrderBy(t => t.TimeStamp)
+                                        .ToList();
 
-        if(foundScores.Any())
+        if (foundScores.Any())
         {
-            foreach (var foundScore in foundScores)
+            var throwModel = new ThrowModel
             {
-                var result =  await _playerThrowService.DeleteAsync(foundScore.Id);
-
-                player.Throws.Remove(foundScore);
-                SetFinischGamePropertie(player, score.Name);
-
+                Id = foundScores.FirstOrDefault().Id,
+                BaseNumber = score.Single.BaseScore,
+                MatchId = CurrentMatch.Id,
+            };
+            foreach (var foundScore in foundScores)
+            {                
+                    player.Throws.Remove(foundScore);
+                    SetFinischGamePropertie(player, score.Name);
+                    var result = await _playerThrowService.DeleteAsync(foundScore.Id);                   
             }
 
-            await _signalRService.SendRemoveThrow(foundScores.First(),player);
+            await _signalRService.SendRemoveThrow(foundScores.First(), player);
+            await _signalRService.SendRemoveStat(throwModel, player);
+
+
+
         }
     }
 
     public async Task RemoveScore(ScoreModel score, DartsPlayerModel player)
     {
+
         var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
-                                                  t.BaseNumber == score.BaseScore).ToList();
+                                              t.BaseNumber == score.BaseScore)
+                                        .OrderBy(t => t.TimeStamp)
+                                        .ToList();
 
         if (foundScores.Any())
         {
-            foreach (var foundScore in foundScores)
+            var throwModel = new ThrowModel
             {
-                var result = await _playerThrowService.DeleteAsync(foundScore.Id);
-
-                player.Throws.Remove(foundScore);
-                SetFinischGamePropertie(player, score.Name);
-            }
+                Id = foundScores.FirstOrDefault().Id,
+                BaseNumber = score.BaseScore,
+                MatchId = CurrentMatch.Id,
+                Throw = score.Score
+            };
 
             await _signalRService.SendRemoveThrow(foundScores.First(), player);
+            foreach (var foundScore in foundScores)
+            {
+                player.Throws.Remove(foundScore);
+                SetFinischGamePropertie(player, score.Name);
+                await _playerThrowService.DeleteAsync(foundScore.Id);
+                throwModel.Id = foundScore.Id;
+            }
+            await _signalRService.SendRemoveStat(throwModel, player);
+
+
         }
     }
 
-    private void SetFinischGamePropertie(DartsPlayerModel player,string scoreName)
+    private void SetFinischGamePropertie(DartsPlayerModel player, string scoreName)
     {
         foreach (var item in player.FinischedNumbers.GetType().GetProperties())
         {
