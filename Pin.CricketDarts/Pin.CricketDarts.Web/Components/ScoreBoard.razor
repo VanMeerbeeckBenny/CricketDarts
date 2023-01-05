@@ -111,65 +111,70 @@
 
     }
 
-    public async Task RemoveScore(ScoresPerNumberModel score, DartsPlayerModel player)
+    public async Task RemoveScore(ScoresPerNumberModel score, DartsPlayerModel player)//evrything but bull
     {
-        var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
-                                                  t.BaseNumber == score.Single.BaseScore)
-                                        .OrderBy(t => t.TimeStamp)
-                                        .ToList();
-
-        if (foundScores.Any())
+        if (ShowButtons)
         {
-            var throwModel = new ThrowModel
+            var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
+                                                      t.BaseNumber == score.Single.BaseScore)
+                                            .OrderBy(t => t.TimeStamp)
+                                            .ToList();
+
+            if (foundScores.Any())
             {
-                Id = foundScores.FirstOrDefault().Id,
-                BaseNumber = score.Single.BaseScore,
-                MatchId = CurrentMatch.Id,
-            };
-            foreach (var foundScore in foundScores)
-            {                
+                var throwModel = new ThrowModel
+                {
+                    Id = foundScores.FirstOrDefault().Id,
+                    BaseNumber = score.Single.BaseScore,
+                    MatchId = CurrentMatch.Id,
+                };
+                foreach (var foundScore in foundScores)
+                {
                     player.Throws.Remove(foundScore);
                     SetFinischGamePropertie(player, score.Name);
-                    var result = await _playerThrowService.DeleteAsync(foundScore.Id);                   
+                    var result = await _playerThrowService.DeleteAsync(foundScore.Id);
+                }
+
+                await _signalRService.SendRemoveThrow(foundScores.First(), player);
+                await _signalRService.SendRemoveStat(throwModel, player);
+
+
+
             }
-
-            await _signalRService.SendRemoveThrow(foundScores.First(), player);
-            await _signalRService.SendRemoveStat(throwModel, player);
-
-
-
         }
     }
 
-    public async Task RemoveScore(ScoreModel score, DartsPlayerModel player)
+    public async Task RemoveScore(ScoreModel score, DartsPlayerModel player)//bull
     {
-
-        var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
-                                              t.BaseNumber == score.BaseScore)
-                                        .OrderBy(t => t.TimeStamp)
-                                        .ToList();
-
-        if (foundScores.Any())
+        if (ShowButtons)
         {
-            var throwModel = new ThrowModel
-            {
-                Id = foundScores.FirstOrDefault().Id,
-                BaseNumber = score.BaseScore,
-                MatchId = CurrentMatch.Id,
-                Throw = score.Score
-            };
+            var foundScores = player.Throws.Where(t => t.MatchId == CurrentMatch.Id &&
+                                                  t.BaseNumber == score.BaseScore)
+                                            .OrderBy(t => t.TimeStamp)
+                                            .ToList();
 
-            await _signalRService.SendRemoveThrow(foundScores.First(), player);
-            foreach (var foundScore in foundScores)
+            if (foundScores.Any())
             {
-                player.Throws.Remove(foundScore);
-                SetFinischGamePropertie(player, score.Name);
-                await _playerThrowService.DeleteAsync(foundScore.Id);
-                throwModel.Id = foundScore.Id;
+                var throwModel = new ThrowModel
+                {
+                    Id = foundScores.FirstOrDefault().Id,
+                    BaseNumber = score.BaseScore,
+                    MatchId = CurrentMatch.Id,
+                    Throw = score.Score
+                };
+
+                await _signalRService.SendRemoveThrow(foundScores.First(), player);
+                foreach (var foundScore in foundScores)
+                {
+                    player.Throws.Remove(foundScore);
+                    SetFinischGamePropertie(player, score.Name);
+                    await _playerThrowService.DeleteAsync(foundScore.Id);
+                    throwModel.Id = foundScore.Id;
+                }
+                await _signalRService.SendRemoveStat(throwModel, player);
+
+
             }
-            await _signalRService.SendRemoveStat(throwModel, player);
-
-
         }
     }
 
