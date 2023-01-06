@@ -81,7 +81,7 @@
             }
         }
     }
-   
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
@@ -133,7 +133,7 @@
         {
             var player = result.Items.FirstOrDefault();
             List<int> scores = player.Matches.Select(m => m.Score).ToList();
-            int averageScore = scores.Any() ?(int)scores.Average() : 0;
+            int averageScore = scores.Any() ? (int)Math.Round(scores.Average()) : 0;
             return averageScore;
         }
         return 0;
