@@ -57,7 +57,7 @@
     private List<DartsMatchModel> allMatches = new();
     private HubConnection hubConnection;
     private SignalRThrowModel newThrow;
-    private List<DartsPlayerModel> allPlayers;
+    private List<DartsPlayerModel> allPlayers = new();
     private DartsPlayerWinModel newWinner;
 
     protected async override Task OnInitializedAsync()
@@ -79,6 +79,11 @@
 
 
         await hubConnection.StartAsync();
+        hubConnection.On<DartsPlayerModel>("SendNewPlayer", async (newPlayer) =>
+        {
+            allPlayers.Add(newPlayer);
+            await InvokeAsync(StateHasChanged);
+        });
 
         hubConnection.On<SignalRThrowModel>("SendThrow", async (gameFact) =>
         {
@@ -262,7 +267,8 @@
                     TimeStamp = at.TimeStamp
 
                 }).ToList(),
-            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).Score
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).Score,
+            IsWon = p.Matches.FirstOrDefault(m => m.MatchId == matchId && m.PlayerId == p.Id).IsWin
         }).ToList();
     }
 }

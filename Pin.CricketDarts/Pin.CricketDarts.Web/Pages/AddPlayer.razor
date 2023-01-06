@@ -1,5 +1,6 @@
 ﻿@page "/AddPlayer"
 @inject IPlayerService _playerService
+@inject ISignalRService _signalRService
 @inject NavigationManager navigation
 <h3>AddPlayer</h3>
 
@@ -56,6 +57,7 @@
         {
             succesMessage = "Player has been addet!";
             visibilitySucces = "visible";
+            await _signalRService.SendNewPlayer(result.Items.FirstOrDefault());
         }
         else
         {
