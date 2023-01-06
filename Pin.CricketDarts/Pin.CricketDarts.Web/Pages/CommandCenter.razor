@@ -130,25 +130,22 @@
     private async Task CreateCurrentMatch()
     {
 
-        var result = await _playerService.GetAllPlayersAsync();
-        int maxPlayerCount;
-        Random random = new Random();
-        currentMatch = new DartsMatchModel();
-
+        var result = await _playerService.GetAllPlayersAsync();       
+        Random random = new Random();   
         List<DartsPlayerModel> valibleCandidated = new();
 
         if (result.IsSucces)
         {
 
             var playerThatAreNotInMatch = result.Items.Where(p => !p.Matches.Any(m => m.Match.IsActiveGame == true)).ToList();
-            maxPlayerCount = playerThatAreNotInMatch.Count();
+            int maxPlayerCount = playerThatAreNotInMatch.Count();
             ItemResultModel<Player> availeblePlayersResult = new();
             DartsPlayerModel playerOne = new();
             if (maxPlayerCount >= 2)
             {
                 var players = ConvertToDartsPlayerModel(playerThatAreNotInMatch);//Find suitable playerOne
 
-                while (players.Count >= 2 && !availeblePlayersResult.IsSucces)
+                while (maxPlayerCount >= 2 && !availeblePlayersResult.IsSucces)
                 {
                     playerOne = players.ElementAt(random.Next(0, maxPlayerCount));
                     playerOne.IsActiveTurn = true;
@@ -164,30 +161,14 @@
 
                     maxPlayerCount = valibleCandidated.Count();
                     var playerTwo = valibleCandidated[random.Next(0, maxPlayerCount)];//end
-                    var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
-                    if (createMatchResult.IsSucces)
+                    bool isSucces = await CreateMatchPlayer(playerOne, playerTwo);
+                    if (isSucces)
                     {
-                        currentMatch = createMatchResult.Items.Select(cm => new DartsMatchModel
-                        {
-                            PlayerOne = playerOne,
-                            PlayerTwo = playerTwo,
-                            Id = cm.Id,
-                            IsActiveMatch = cm.IsActiveGame,
-                        }).FirstOrDefault();
-
-                        await _matchPlayerService.CreateAsync(currentMatch.Id, playerOne.Id);
-                        await _matchPlayerService.CreateAsync(currentMatch.Id, playerTwo.Id);
-
-                        error = String.Empty;
-                        gameIsDoneMessage = string.Empty;
+                        ClearMessages();
                         await GetActiveGames();
                         await _sigalRService.SendNewMatch(currentMatch);
-
                     }
-                    else error = createMatchResult.ErrorMessage;
-
-
-
+                    else error = "Something went wrong, please try again later!";
                 }
                 else error = availeblePlayersResult.ErrorMessage;
             }
@@ -195,36 +176,26 @@
         };
     }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
-    {
-        return players.Select(p => new DartsPlayerModel
-        {
-            Id = p.Id,
-            FirstName = p.Firstname,
-            LastName = p.Lastname,
-            Throws = new List<ThrowModel>(),
-        }).ToList();
-    }
 
-    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
+
+    private async Task<bool> CreateMatchPlayer(DartsPlayerModel playerOne, DartsPlayerModel playerTwo)
     {
-        return players.Select(p => new DartsPlayerModel
+        var createMatchResult = await _matchService.CreateAsync(playerOne.Id, playerTwo.Id);
+        if (createMatchResult.IsSucces)
         {
-            Id = p.Id,
-            FirstName = p.Firstname,
-            LastName = p.Lastname,
-            Throws = p.AllThrows
-            .Where(at => at.MatchId == matchId && at.PlayerId == p.Id)
-            .Select(at => new ThrowModel
+            currentMatch = createMatchResult.Items.Select(cm => new DartsMatchModel
             {
-                Id = at.Id,
-                MatchId = at.MatchId,
-                BaseNumber = (int)at.Score.OriginalScore,
-                Throw = (int)at.Score.Score,
-                TimeStamp = at.TimeStamp,
-            }).ToList(),
-            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId)?.Score != null ? p.Matches.FirstOrDefault(m => m.MatchId == matchId).Score : 0,
-        }).ToList();
+                PlayerOne = playerOne,
+                PlayerTwo = playerTwo,
+                Id = cm.Id,
+                IsActiveMatch = cm.IsActiveGame,
+            }).FirstOrDefault();
+
+            var resultOne = await _matchPlayerService.CreateAsync(currentMatch.Id, playerOne.Id);
+            var resultTwo = await _matchPlayerService.CreateAsync(currentMatch.Id, playerTwo.Id);
+            if (resultOne.IsSucces && resultTwo.IsSucces) return true;
+        }
+        return false;
     }
 
     private async Task ProcessThrow(ScoreModel score)
@@ -304,8 +275,8 @@
                         if (shouldGetScore)
                         {
                             if (isFinischedBefore) player.Score += score.Score;
-                            else player.Score += total - score.BaseScore * 3;                       
-                            await _matchPlayerService.UpdateAsync(currentMatch.Id, player.Id, player.Score);                            
+                            else player.Score += total - score.BaseScore * 3;
+                            await _matchPlayerService.UpdateAsync(currentMatch.Id, player.Id, player.Score);
                         }
                         break;
                     }
@@ -457,12 +428,47 @@
 
     public void ActivateMatch(DartsMatchModel selectedMatch)
     {
-        error = string.Empty;
-        gameIsDoneMessage = string.Empty;
+        ClearMessages();
         currentMatch = activeGames.FirstOrDefault(ag => ag.Id == selectedMatch.Id);
     }
 
+    private void ClearMessages()
+    {
+        error = String.Empty;
+        gameIsDoneMessage = string.Empty;
+    }
 
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = new List<ThrowModel>(),
+        }).ToList();
+    }
+
+    private List<DartsPlayerModel> ConvertToDartsPlayerModel(List<Player> players, Guid matchId)
+    {
+        return players.Select(p => new DartsPlayerModel
+        {
+            Id = p.Id,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            Throws = p.AllThrows
+            .Where(at => at.MatchId == matchId && at.PlayerId == p.Id)
+            .Select(at => new ThrowModel
+            {
+                Id = at.Id,
+                MatchId = at.MatchId,
+                BaseNumber = (int)at.Score.OriginalScore,
+                Throw = (int)at.Score.Score,
+                TimeStamp = at.TimeStamp,
+            }).ToList(),
+            Score = p.Matches.FirstOrDefault(m => m.MatchId == matchId)?.Score != null ? p.Matches.FirstOrDefault(m => m.MatchId == matchId).Score : 0,
+        }).ToList();
+    }
 
 }
 
