@@ -58,7 +58,7 @@
     {
         if (!match.IsActiveMatch)
         {
-            var winningPlayer = match.PlayerTwo.Score > match.PlayerOne.Score ? match.PlayerTwo : match.PlayerOne;
+            var winningPlayer = (bool)match.PlayerTwo.IsWon ? match.PlayerTwo : match.PlayerOne;
             var playerIsFound = Players.FirstOrDefault(p => p.Id == winningPlayer.Id);
             if (playerIsFound != null)
             {
