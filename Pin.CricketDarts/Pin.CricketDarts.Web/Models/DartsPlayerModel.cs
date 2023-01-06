@@ -15,6 +15,7 @@ namespace Pin.CricketDarts.Web.Models
         public bool IsActiveTurn { get; set; }
 
         public FinischedNumbersModel FinischedNumbers { get; set; } = new();
+        public bool? IsWon { get; set; }
 
 
     }
