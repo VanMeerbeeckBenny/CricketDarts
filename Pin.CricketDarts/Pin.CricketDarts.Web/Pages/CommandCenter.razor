@@ -130,8 +130,8 @@
     private async Task CreateCurrentMatch()
     {
 
-        var result = await _playerService.GetAllPlayersAsync();       
-        Random random = new Random();   
+        var result = await _playerService.GetAllPlayersAsync();
+        Random random = new Random();
         List<DartsPlayerModel> valibleCandidated = new();
 
         if (result.IsSucces)
@@ -173,7 +173,7 @@
                 else error = availeblePlayersResult.ErrorMessage;
             }
             else error = "No available players!";
-        };
+        }else error= "No available players!";
     }
 
 
@@ -309,6 +309,8 @@
             if (isSame) gameIsDoneMessage += $"{winner.FirstName}-{winner.LastName} has finisched the game first!!";
 
             var result = await _matchService.UpdateAsync(currentMatch.Id, false);
+            await _matchPlayerService.UpdateAsync(currentMatch.Id, winner.Id, winner.Score,true);
+            await _matchPlayerService.UpdateAsync(currentMatch.Id, loser.Id, loser.Score, false);
             await GetActiveGames();
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;
