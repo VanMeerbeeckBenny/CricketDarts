@@ -224,3 +224,14 @@ table{
 thead{
     color:red;
 }
+@font-face {
+    font-family: "CustomFont";
+    src: url("/fonts/FrostbiteBossFight-dL0Z.ttf");   
+}
+
+
+h1 {
+    font-family: CustomFont;
+    color: #11285C;
+    letter-spacing:3px;
+}
