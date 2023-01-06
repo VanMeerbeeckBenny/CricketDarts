@@ -304,16 +304,9 @@
                         if (shouldGetScore)
                         {
                             if (isFinischedBefore) player.Score += score.Score;
-                            else player.Score += total - score.BaseScore * 3;
-                            var resultPlayerMatchFound = await _matchPlayerService.GetByMatchAndPlayerId(currentMatch.Id, player.Id);
-                            if (resultPlayerMatchFound.IsSucces)
-                            {
-                                var foundMatchPlayer = resultPlayerMatchFound.Items.FirstOrDefault();
-                                foundMatchPlayer.Score = player.Score;
-                                await _matchPlayerService.UpdateAsync(foundMatchPlayer.Id, currentMatch.Id, player.Id, player.Score);
-                            }
+                            else player.Score += total - score.BaseScore * 3;                       
+                            await _matchPlayerService.UpdateAsync(currentMatch.Id, player.Id, player.Score);                            
                         }
-
                         break;
                     }
                 }
@@ -344,7 +337,7 @@
             gameIsDoneMessage = $"The winner is {winner.FirstName}-{winner.LastName} with a score of {winner.Score} vs {loser.Score}!!\n";
             if (isSame) gameIsDoneMessage += $"{winner.FirstName}-{winner.LastName} has finisched the game first!!";
 
-            var result = await _matchService.UpdateAsync(currentMatch.Id, false, currentMatch.PlayerOne.Score, currentMatch.PlayerTwo.Score);
+            var result = await _matchService.UpdateAsync(currentMatch.Id, false);
             await GetActiveGames();
             if (result.IsSucces) currentMatch = null;
             else error = result.ErrorMessage;

@@ -12,7 +12,6 @@ namespace Pin.CricketDarts.Core.Interfaces.Services
     public interface IMatchPlayerService
     {
         Task<ItemResultModel<MatchPlayer>> CreateAsync(Guid matchId, Guid playerId);
-        Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid id, Guid matchId, Guid playerId, int score);
-        Task<ItemResultModel<MatchPlayer>> GetByMatchAndPlayerId(Guid matchId, Guid playerId);
+        Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid matchId, Guid playerId, int score);      
     }
 }

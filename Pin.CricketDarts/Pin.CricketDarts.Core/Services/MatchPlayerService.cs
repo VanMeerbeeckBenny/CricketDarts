@@ -27,23 +27,15 @@ namespace Pin.CricketDarts.Core.Services
 
         }
 
-        public async Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid id,Guid matchId, Guid playerId,int score)
-        {
-            var foundMatchPlayer = await _matchPlayerRepository.GetByIdAsync(id);
-
-            if (foundMatchPlayer == null) return new ItemResultModel<MatchPlayer> { ErrorMessage = "Not found!" };
-            if (await _matchPlayerRepository.UpdateAsync(foundMatchPlayer))
-                return new ItemResultModel<MatchPlayer> { IsSucces = true };
-            return new ItemResultModel<MatchPlayer> { ErrorMessage = "Something went wrong, please try again later!" };
-        }
-
-        public async Task<ItemResultModel<MatchPlayer>>GetByMatchAndPlayerId(Guid matchId,Guid playerId)
+        public async Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid matchId, Guid playerId,int score)
         {
             var foundMatchPlayer = await _matchPlayerRepository.GetByMatchAndPlayerId(matchId, playerId);
 
-            if (foundMatchPlayer == null) return new ItemResultModel<MatchPlayer> { ErrorMessage = "Not found!" };            
-            return new ItemResultModel<MatchPlayer> { IsSucces = true , Items = new List<MatchPlayer>{ foundMatchPlayer} };
-         
-        }
+            if (foundMatchPlayer == null) return new ItemResultModel<MatchPlayer> { ErrorMessage = "Not found!" };
+            foundMatchPlayer.Score = score;
+            if (await _matchPlayerRepository.UpdateAsync(foundMatchPlayer))
+                return new ItemResultModel<MatchPlayer> { IsSucces = true };
+            return new ItemResultModel<MatchPlayer> { ErrorMessage = "Something went wrong, please try again later!" };
+        }     
     }
 }

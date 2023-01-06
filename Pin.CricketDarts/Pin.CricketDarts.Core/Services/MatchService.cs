@@ -42,7 +42,7 @@ namespace Pin.CricketDarts.Core.Services
             return new ItemResultModel<Match> { IsSucces = true, Items = new List<Match> { newMatch } };
         }
 
-        public async Task<ItemResultModel<Match>> UpdateAsync(Guid id, bool isActive, int playerOneScore, int PlayerTwoScore)
+        public async Task<ItemResultModel<Match>> UpdateAsync(Guid id, bool isActive)
         {
             Match foundMatch = await _matchRepository.GetByIdAsync(id);
             if (foundMatch == null) return new ItemResultModel<Match> { ErrorMessage = "No sutch match!" };
