@@ -13,5 +13,6 @@ namespace Pin.CricketDarts.Core.Entities
         public Guid PlayerId { get; set; }
         public Player Player { get; set; }
         public int Score { get; set; }
+        public bool? IsWin { get; set; }
     }
 }
