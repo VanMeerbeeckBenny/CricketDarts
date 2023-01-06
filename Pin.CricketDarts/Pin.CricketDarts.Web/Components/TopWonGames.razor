@@ -32,72 +32,88 @@
 
 @code{
 
-    [Parameter]
-    public List<DartsMatchModel> AllMatches { get; set;}
-    [Parameter]
-    public DartsPlayerWinModel NewWinner { get; set; }
-    private List<DartsPlayerWinModel> Players = new();
+        [Parameter]
+        public List<DartsMatchModel> AllMatches { get; set;}
+        [Parameter]
+        public DartsPlayerWinModel NewWinner { get; set; }
+        private List<DartsPlayerWinModel> Players = new();
 
-    protected async override Task OnInitializedAsync()
-    {
-        foreach (var match in AllMatches.Where(am => !am.IsActiveMatch))
+        protected async override Task OnInitializedAsync()
         {
-            CheckWinner(match);
-        }
-        foreach (var player in Players)
-        {
-            player.AverageScore = await CalculatePlayerAverageScore(player.Id);
-        }
-        Players = Players.OrderByDescending(p => p.WonMatches)
-                     .ThenByDescending(p => p.AverageScore)
-                     .ToList();
-    }
-
-
-    private void CheckWinner(DartsMatchModel match)
-    {
-        if (!match.IsActiveMatch)
-        {
-            var winningPlayer = (bool)match.PlayerTwo.IsWon ? match.PlayerTwo : match.PlayerOne;
-            var playerIsFound = Players.FirstOrDefault(p => p.Id == winningPlayer.Id);
-            if (playerIsFound != null)
+            foreach (var match in AllMatches.Where(am => !am.IsActiveMatch))
             {
-                playerIsFound.AllScores.Add(winningPlayer.Score);
-                playerIsFound.WonMatches++;
-
+                CheckWinner(match);
             }
-            else
+            foreach (var player in Players)
             {
-                var newWinningPlayer = new DartsPlayerWinModel
+                player.AverageScore = await CalculatePlayerAverageScore(player.Id);
+            }
+            Players = Players.OrderByDescending(p => p.WonMatches)
+                         .ThenByDescending(p => p.AverageScore)
+                         .ToList();
+        }
+
+
+        private void CheckWinner(DartsMatchModel match)
+        {
+            if (!match.IsActiveMatch)
+            {
+                var players = new List<DartsPlayerModel> { match.PlayerOne, match.PlayerTwo };
+                foreach (var player in players)
                 {
-                    Id = winningPlayer.Id,
-                    Firstname = winningPlayer.FirstName,
-                    Lastname = winningPlayer.LastName,
-                    WonMatches = 1,
 
-                };
-                newWinningPlayer.AllScores.Add(winningPlayer.Score);
-                Players.Add(newWinningPlayer);
+                    var playerIsFound = Players.FirstOrDefault(p => p.Id == player.Id);
+                    if (playerIsFound != null)
+                    {
+                        playerIsFound.AllScores.Add(player.Score);
+                        if((bool)player.IsWon)
+                            playerIsFound.WonMatches++;
+
+                    }
+                    else
+                    {
+                        var newWinningPlayer = new DartsPlayerWinModel
+                        {
+                            Id = player.Id,
+                            Firstname = player.FirstName,
+                            Lastname = player.LastName,
+                            WonMatches = (bool)player.IsWon? 1:0,
+                            AllScores = new List<int> { player.Score}
+
+                        };
+
+                        Players.Add(newWinningPlayer);
+                    }
+                }
+
             }
         }
-    }
 
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        if(NewWinner != null)
+        protected override void OnParametersSet()
         {
-            var foundWinner = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
-            var foundLoser = Players.FirstOrDefault(p => p.Id == NewWinner.Loser.Id);
-            if (foundWinner != null)
+            base.OnParametersSet();
+            if(NewWinner != null)
             {
-                foundWinner.WonMatches++;
-                foundWinner.AllScores.Add(NewWinner.CurrentScore);
-            }
-            else
-            {
-                NewWinner.AllScores.Add(NewWinner.CurrentScore);
-                Players.Add(NewWinner);
+                var foundWinner = Players.FirstOrDefault(p => p.Id == NewWinner.Id);
+                var foundLoser = Players.FirstOrDefault(p => p.Id == NewWinner.Loser.Id);
+                if (foundWinner != null)
+                {
+                    foundWinner.WonMatches++;
+                    foundWinner.AllScores.Add(NewWinner.CurrentScore);
+                }
+                else
+                {
+                    var winner = new DartsPlayerWinModel
+                    {
+                        Id = NewWinner.Id,
+                        Firstname = NewWinner.Firstname,
+                        Lastname = NewWinner.Lastname,
+                        AverageScore = NewWinner.CurrentScore,
+                        AllScores = new List<int> { NewWinner.CurrentScore },
+                        WonMatches = 1
+                };
+
+                Players.Add(winner);
             }
 
             if (foundLoser != null)
@@ -142,7 +158,7 @@
 
     private int CalculatePlayerAverageScore(DartsPlayerWinModel player)//thats why i made this
     {
-        player.AverageScore = player.AllScores.Any() ? (int)Math.Round(player.AllScores.Average()):0;
+        player.AverageScore = player.AllScores.Any()? (int)Math.Round(player.AllScores.Average()):0;
         return player.AverageScore;
     }
 
