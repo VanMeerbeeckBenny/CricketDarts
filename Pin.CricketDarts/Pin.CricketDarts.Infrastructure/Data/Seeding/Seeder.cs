@@ -41,34 +41,7 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
                 new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.TripleTwenty, OriginalScore = DartsScoreEnum.Twenty},
                 new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullOuter,OriginalScore = DartsScoreEnum.BullOuter},
                 new Point {Id = Guid.NewGuid(),Score = DartsScoreEnum.BullInner,OriginalScore = DartsScoreEnum.BullOuter},
-            };
-
-            var matches = new Match[]
-            {
-                new Match{ Id = Guid.NewGuid(),TimeStamp = DateTime.Now},
-                new Match{ Id = Guid.NewGuid(),TimeStamp = DateTime.Now.AddHours(2)},
-            };
-
-            var playerThrows = new PlayerThrow[]
-            {
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[0].Id,MatchId = matches[1].Id,ScoreId = throws[0].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[0].Id,MatchId = matches[0].Id,ScoreId = throws[1].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[0].Id,MatchId = matches[0].Id,ScoreId = throws[4].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[0].Id,MatchId = matches[0].Id,ScoreId = throws[6].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[1].Id,MatchId = matches[1].Id,ScoreId = throws[4].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[1].Id,MatchId = matches[0].Id,ScoreId = throws[8].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[1].Id,MatchId = matches[0].Id,ScoreId = throws[16].Id},
-                new PlayerThrow{Id = Guid.NewGuid(),PlayerId = players[1].Id,MatchId = matches[0].Id,ScoreId = throws[19].Id},
-            };
-
-
-            var matchPlayer = new MatchPlayer[]
-            {
-                new MatchPlayer{MatchId = matches[0].Id,PlayerId = players[0].Id , Score = 500},
-                new MatchPlayer{MatchId = matches[1].Id,PlayerId = players[0].Id , Score = 200},
-                new MatchPlayer{MatchId = matches[0].Id,PlayerId = players[1].Id , Score = 100},
-                new MatchPlayer{MatchId = matches[1].Id,PlayerId = players[1].Id, Score = 150},
-            };
+            };     
 
    
             builder.Entity<Point>()
@@ -77,8 +50,7 @@ namespace Pin.CricketDarts.Infrastructure.Data.Seeding
 
             builder.Entity<Player>().HasData(players);
             builder.Entity<Point>().HasData(throws);
-            builder.Entity<Match>().HasData(matches);
-            builder.Entity<PlayerThrow>().HasData(playerThrows);
+        
         }
     }
 }
