@@ -27,12 +27,13 @@ namespace Pin.CricketDarts.Core.Services
 
         }
 
-        public async Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid matchId, Guid playerId,int score)
+        public async Task<ItemResultModel<MatchPlayer>> UpdateAsync(Guid matchId, Guid playerId,int score,bool? isWin = null)
         {
             var foundMatchPlayer = await _matchPlayerRepository.GetByMatchAndPlayerId(matchId, playerId);
 
             if (foundMatchPlayer == null) return new ItemResultModel<MatchPlayer> { ErrorMessage = "Not found!" };
             foundMatchPlayer.Score = score;
+            foundMatchPlayer.IsWin = isWin;
             if (await _matchPlayerRepository.UpdateAsync(foundMatchPlayer))
                 return new ItemResultModel<MatchPlayer> { IsSucces = true };
             return new ItemResultModel<MatchPlayer> { ErrorMessage = "Something went wrong, please try again later!" };

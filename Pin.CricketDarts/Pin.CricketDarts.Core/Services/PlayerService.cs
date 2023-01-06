@@ -42,7 +42,7 @@ namespace Pin.CricketDarts.Core.Services
             };
 
             if (await _playerRepository.CreateAsync(playerToAdd))
-                return new ItemResultModel<Player> { IsSucces = true };
+                return new ItemResultModel<Player> { IsSucces = true,Items = new List<Player> { playerToAdd } };
 
             return new ItemResultModel<Player> { ErrorMessage = "Something went wrong, please try again later" }; ;
         }
