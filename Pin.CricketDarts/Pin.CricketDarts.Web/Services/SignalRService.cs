@@ -4,6 +4,7 @@ using Pin.CricketDarts.Web.Models;
 using Microsoft.AspNetCore.Components;
 using Pin.CricketDarts.Web.Interfaces;
 using static System.Formats.Asn1.AsnWriter;
+using Pin.CricketDarts.Core.Entities;
 
 namespace Pin.CricketDarts.Web.Services
 {
@@ -39,6 +40,25 @@ namespace Pin.CricketDarts.Web.Services
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("SendThrow", signalrThrowModel);
+        }
+        
+        public async Task SendNewPlayer(Player player)
+        {
+            var dartsPlayerModel = new DartsPlayerModel
+            {
+                Id = player.Id,
+                FirstName = player.Firstname,
+                LastName = player.Lastname,
+                Throws = new List<ThrowModel>(),
+                FinischedNumbers = new FinischedNumbersModel(),                
+            };
+
+            HubConnection hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/Cricket-darts"))
+                .Build();
+
+            await hubConnection.StartAsync();
+            await hubConnection.SendAsync("SendNewPlayer", dartsPlayerModel);
         }
 
         public async Task SendRemoveThrow(ThrowModel playerThrow, DartsPlayerModel player)

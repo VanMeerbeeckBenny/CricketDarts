@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Pin.CricketDarts.Core.Entities;
 using Pin.CricketDarts.Web.Models;
 
 namespace Pin.CricketDarts.Web.Interfaces
@@ -11,5 +12,6 @@ namespace Pin.CricketDarts.Web.Interfaces
         Task SendNewWinner(DartsPlayerWinModel player);
         Task SendRemoveThrow(ThrowModel playerThrow, DartsPlayerModel player);
         Task SendRemoveStat(ThrowModel throwModel, DartsPlayerModel player);
+        Task SendNewPlayer(Player player);
     }
 }

@@ -29,5 +29,10 @@ namespace Pin.CricketDarts.Web.Hubs
         {
             await Clients.Others.SendAsync("SendRemoveStat", playerThrow);
         }
+
+        public async Task SendNewPlayer(DartsPlayerModel player)
+        {
+            await Clients.Others.SendAsync("SendNewPlayer", player);
+        }
     }
 }
